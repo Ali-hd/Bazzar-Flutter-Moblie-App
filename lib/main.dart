@@ -14,9 +14,12 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+  String token;
+  Map<String, dynamic> decodedToken;
     Future<bool> _checktoken() async {
       final storage = FlutterSecureStorage();
-      final String token = await storage.read(key: 'token');
+      token = await storage.read(key: 'token');
+      decodedToken = JwtDecoder.decode(token);
       final bool isExpired = JwtDecoder.isExpired(token);
       print('token= $token');
       print('token is expired $isExpired');
@@ -27,6 +30,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => PostProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
         )
       ],
       child: MaterialApp(

@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bazzar/models/models.dart';
 import 'package:http/http.dart' as http;
 
-class API {
+class API{
   static const API_URL = 'https://bazaar-api-v1.herokuapp.com';
   static const headers = {
     'Content-type': 'application/json',
@@ -49,6 +49,17 @@ class API {
   }
 
   Future getSinglePost(String id) {
+    print('api get single post');
     return http.get(API_URL + '/post/$id');
+  }
+
+  Future getAccount() async{
+    String token = await storage.read(key: 'token'); 
+    Map<String, String> headerAuth = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token' 
+    };
+    return http.get(API_URL + '/auth/user', headers: headerAuth);
   }
 }

@@ -46,6 +46,7 @@ class PostProvider with ChangeNotifier {
       setSPLoading(false);
     }).catchError((err) {
       print('error getting single post: $err');
+      setSPLoading(false);
     });
   }
 
@@ -69,6 +70,7 @@ class PostProvider with ChangeNotifier {
 
   void setSPLoading(bool value) {
     spLoading = value;
+    notifyListeners();
   }
 
   void setPosts(value, bool merge) {
@@ -84,6 +86,5 @@ class PostProvider with ChangeNotifier {
 
   void setSinglePost(value) {
     _singlePost = value;
-    notifyListeners();
   }
 }
