@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bazzar/models/models.dart';
 import 'package:http/http.dart' as http;
 
-class API{
+class API {
   static const API_URL = 'https://bazaar-api-v1.herokuapp.com';
   static const headers = {
     'Content-type': 'application/json',
@@ -11,6 +11,16 @@ class API{
   };
 
   final storage = FlutterSecureStorage();
+
+  Future<Map<String, String>> createHeaderAuth() async{
+    String token = await storage.read(key: 'token');
+    Map<String, String> header = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+    return header;
+  }
 
   Future<User> login(Login values) {
     return http
@@ -53,13 +63,42 @@ class API{
     return http.get(API_URL + '/post/$id');
   }
 
-  Future getAccount() async{
-    String token = await storage.read(key: 'token'); 
-    Map<String, String> headerAuth = {
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token' 
-    };
+  Future getAccount() async {
+    Map<String, String> headerAuth = await createHeaderAuth();
     return http.get(API_URL + '/auth/user', headers: headerAuth);
+  }
+
+  Future handleSearch(String text, String city) {
+    return http.post(
+      API_URL + '/post/search?city=${city.toLowerCase()}&time=a-t',
+      headers: headers,
+      body: jsonEncode(<String, String>{
+      'search': text,
+    }),
+    );
+  }
+
+  Future postComment(String text, String postId) async{
+    Map<String, String> headerAuth = await createHeaderAuth();
+    return http.post(
+      API_URL + '/post/$postId/comment',
+      headers: headerAuth,
+      body: jsonEncode(<String, String>{
+      'description': text,
+    }),
+    );
+  }
+
+  Future getUser(String username){
+    // to get email of user pass auth token
+    return http.get(API_URL + '/user/$username', headers: headers);
+  }
+
+  Future likePost(String postId) async {
+    Map<String, String> headerAuth = await createHeaderAuth();
+    return http.post(
+      API_URL + '/post/$postId/like',
+      headers: headerAuth,
+    );
   }
 }

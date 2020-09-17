@@ -8,10 +8,8 @@ class PostProvider with ChangeNotifier {
   Map<String, dynamic> get getPosts => _posts;
   List _postResults;
   List get getPostsResults => _postResults;
-  Map<String, dynamic> _singlePost;
-  Map<String, dynamic> get getSinglePost => _singlePost;
   bool loading = false;
-  bool spLoading = false;
+  bool searchLoading = false;
   bool get getLoading => loading;
   String _currentCity = 'All';
   String get getCurrentCity => _currentCity;
@@ -22,6 +20,7 @@ class PostProvider with ChangeNotifier {
     print('helllooo');
     API().getPosts(_currentCity, _currentPage).then((res) {
       if (res.statusCode == 200) {
+        setLoading(false);
         if (_posts == null || _currentPage == 1) {
           setPosts(jsonDecode(res.body), false);
         } else if (_currentPage > 1) {
@@ -31,22 +30,27 @@ class PostProvider with ChangeNotifier {
       } else {
         print(res.statusCode);
       }
-      setLoading(false);
     }).catchError((err) {
       print('error getting posts $err');
+      setLoading(false);
+      notifyListeners();
     });
   }
 
-  Future fetchSinglePost(String id) {
-    setSPLoading(true);
-    print('getting single post');
-    API().getSinglePost(id).then((res) {
-      setSinglePost(jsonDecode(res.body)['post']);
-      print('status code 200:=> ${jsonDecode(res.body)}');
-      setSPLoading(false);
-    }).catchError((err) {
-      print('error getting single post: $err');
-      setSPLoading(false);
+  Future searchPosts(String text){
+    setSearchLoading(true);
+    notifyListeners();
+    API().handleSearch(text, _currentCity).then((res){
+      if (_posts == null || _currentPage == 1) {
+          setPosts(jsonDecode(res.body), false);
+        } else if (_currentPage > 1) {
+          // merge old posts with new posts
+          setPosts(jsonDecode(res.body), true);
+        }
+        setSearchLoading(false);
+    }).catchError((err){
+        print('error getting posts $err');
+        setSearchLoading(false);
     });
   }
 
@@ -68,9 +72,8 @@ class PostProvider with ChangeNotifier {
     loading = value;
   }
 
-  void setSPLoading(bool value) {
-    spLoading = value;
-    notifyListeners();
+  void setSearchLoading(bool value){
+    searchLoading = value;
   }
 
   void setPosts(value, bool merge) {
@@ -82,9 +85,5 @@ class PostProvider with ChangeNotifier {
       print(_postResults);
     }
     notifyListeners();
-  }
-
-  void setSinglePost(value) {
-    _singlePost = value;
   }
 }

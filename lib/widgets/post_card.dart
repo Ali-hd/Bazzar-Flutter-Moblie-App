@@ -1,9 +1,14 @@
+import 'package:bazzar/screens/profile.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:bazzar/screens/post.dart';
+import 'widgets.dart';
 
 class PostCard extends StatelessWidget {
   final Map post;
-  const PostCard({Key key, this.post}) : super(key: key);
+  final String heroIndex;
+  const PostCard({Key key, @required this.post, @required this.heroIndex})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +22,10 @@ class PostCard extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (_) => PostScreen(
-                      // https from s3 causing issues 
-                      postId: post['_id'], postImg: post['images'][0].replaceAll('https','http'))));
+                        // https from s3 causing issues
+                        postId: post['_id'],
+                        postImg:
+                            post['images'][0].replaceAll('https', 'http'))));
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -29,10 +36,22 @@ class PostCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
-                      child: CircleAvatar(
-                        radius: 15,
-                        backgroundImage:
-                            NetworkImage(post['user']['profileImg'].replaceAll('https','http')),
+                      child: PhotoHero(
+                        photo: post['user']['profileImg']
+                            .replaceAll('https', 'http'),
+                        width: 30,
+                        tag: heroIndex,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProfileScreen(
+                                  username: post['user']['username'],
+                                  profileImg: post['user']['profileImg'],
+                                  heroIndex: heroIndex),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     Expanded(
@@ -65,11 +84,23 @@ class PostCard extends StatelessWidget {
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   child: Text(post['title']),
                 ),
-                Image(
-                  image: NetworkImage(post['images'][0].replaceAll('https','http')),
-                  height: 250,
-                  fit: BoxFit.cover,
-                )
+                CachedNetworkImage(
+                  imageUrl: post['images'][0].replaceAll('https', 'http'),
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 250,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) => Container(
+                    height: 250,
+                    color: Colors.grey,
+                  ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
               ],
             ),
           ),

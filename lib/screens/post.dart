@@ -1,4 +1,5 @@
 import 'package:bazzar/Providers/providers.dart';
+import 'package:bazzar/screens/profile.dart';
 import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -22,14 +23,14 @@ class _PostScreenState extends State<PostScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostProvider>(context, listen: false)
+      Provider.of<SinglePostProvider>(context, listen: false)
           .fetchSinglePost(widget.postId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final providerPost = Provider.of<PostProvider>(context, listen: true);
+    final providerPost = Provider.of<SinglePostProvider>(context, listen: true);
     final post = providerPost.getSinglePost;
     final _account =
         Provider.of<UserProvider>(context, listen: false).getAccount;
@@ -49,6 +50,8 @@ class _PostScreenState extends State<PostScreen> {
               ),
             ))
         .toList();
+
+    String commentText = '';
 
     // String readTimestamp(int timestamp) {
     // var now = DateTime.now();
@@ -82,11 +85,23 @@ class _PostScreenState extends State<PostScreen> {
             .map<Widget>((comment) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(children: [
-                    CircleAvatar(
-                      radius: 15,
-                      backgroundImage: NetworkImage(comment['user']
-                              ['profileImg']
-                          .replaceAll('https', 'http')),
+                    PhotoHero(
+                      photo: comment['user']['profileImg']
+                          .replaceAll('https', 'http'),
+                      width: 30,
+                      tag: comment['createdAt'],
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProfileScreen(
+                                username: comment['user']['username'],
+                                profileImg: comment['user']['profileImg']
+                                    .replaceAll('https', 'http'),
+                                heroIndex: comment['createdAt']),
+                          ),
+                        );
+                      },
                     ),
                     SizedBox(
                       width: 10,
@@ -126,6 +141,28 @@ class _PostScreenState extends State<PostScreen> {
             .toList()
         : [Text('No Comments')];
 
+    void setCommentText(String text) {
+      setState(() {
+        commentText = text;
+      });
+    }
+
+    void postComment() async {
+      await providerPost.comment(commentText, post['_id']);
+    }
+
+    void _settingModalBottomSheet(context) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return PostBottomSheet(
+            setCommentText: setCommentText,
+            postComment: postComment,
+          );
+        },
+      );
+    }
+
     return Scaffold(
         backgroundColor: Colors.grey[300],
         appBar: AppBar(
@@ -147,7 +184,8 @@ class _PostScreenState extends State<PostScreen> {
                         strokeWidth: 3,
                         valueColor: AlwaysStoppedAnimation(Colors.black54),
                       ),
-                    ))
+                    ),
+                  )
                 : Container()
           ],
         ),
@@ -299,9 +337,15 @@ class _PostScreenState extends State<PostScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(children: [
-                                        Icon(
-                                          Icons.date_range,
-                                          size: 15,
+                                        GestureDetector(
+                                          onTap: () async {
+                                            providerPost
+                                                .handleLike(widget.postId);
+                                          },
+                                          child: Icon(
+                                            Icons.date_range,
+                                            size: 15,
+                                          ),
                                         ),
                                         SizedBox(
                                           width: 1,
@@ -336,11 +380,26 @@ class _PostScreenState extends State<PostScreen> {
                                     children: [
                                       Padding(
                                         padding: EdgeInsets.only(right: 10),
-                                        child: CircleAvatar(
-                                          radius: 16,
-                                          backgroundImage: NetworkImage(
-                                              post['user']['profileImg']
-                                                  .replaceAll('https', 'http')),
+                                        child: PhotoHero(
+                                          photo: post['user']['profileImg']
+                                              .replaceAll('https', 'http'),
+                                          width: 32,
+                                          tag: 'seller',
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => ProfileScreen(
+                                                    username: post['user']
+                                                        ['username'],
+                                                    profileImg: post['user']
+                                                            ['profileImg']
+                                                        .replaceAll(
+                                                            'https', 'http'),
+                                                    heroIndex: 'seller'),
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
                                       Text(
@@ -375,12 +434,13 @@ class _PostScreenState extends State<PostScreen> {
                                         width: 5,
                                       ),
                                       Expanded(
-                                          child: Text(
-                                        'Comments',
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600),
-                                      )),
+                                        child: Text(
+                                          'Comments',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   Divider(
@@ -404,39 +464,32 @@ class _PostScreenState extends State<PostScreen> {
                                         CircleAvatar(
                                           radius: 16,
                                           backgroundImage: NetworkImage(
-                                              _account['profileImg']
-                                                  .replaceAll('https', 'http')),
+                                            _account['profileImg']
+                                                .replaceAll('https', 'http'),
+                                          ),
                                         ),
                                         SizedBox(
                                           width: 10,
                                         ),
                                         Expanded(
-                                          child: TextField(
-                                            enabled: true,
-                                            minLines: 2,
-                                            maxLines: null,
-                                            keyboardType:
-                                                TextInputType.multiline,
-                                            textAlign: TextAlign.start,
-                                            cursorWidth: 1,
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      width: 1,
-                                                      color: Colors.grey),
-                                                  borderRadius:
-                                                      const BorderRadius.all(
-                                                          const Radius.circular(
-                                                              4))),
-                                              contentPadding:
-                                                  EdgeInsets.all(10.0),
-                                              floatingLabelBehavior:
-                                                  FloatingLabelBehavior.never,
-                                              hintText: 'Post a comment',
-                                              labelStyle: TextStyle(
-                                                  color: Colors.black54),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              _settingModalBottomSheet(context);
+                                            },
+                                            child: Container(
+                                              height: 35,
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.grey[600]),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                  const Radius.circular(4),
+                                                ),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8, horizontal: 10),
+                                              child: Text('Post a comment'),
                                             ),
-                                            cursorColor: Colors.black54,
                                           ),
                                         ),
                                       ],
