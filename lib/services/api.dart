@@ -50,11 +50,11 @@ class API {
     }).catchError((err) => print(err));
   }
 
-  Future getPosts(String city, int page) {
-    print('/post?page=$page&limit=16&city=${city.toLowerCase()}&time=a-t');
+  Future getPosts(String city, int page, String time) {
+    print('/post?page=$page&limit=16&city=${city.toLowerCase()}&time=$time');
     return http.get(
         API_URL +
-            '/post?page=$page&limit=16&city=${city.toLowerCase()}&time=a-t',
+            '/post?page=$page&limit=16&city=${city.toLowerCase()}&time=$time',
         headers: headers);
   }
 
@@ -68,9 +68,9 @@ class API {
     return http.get(API_URL + '/auth/user', headers: headerAuth);
   }
 
-  Future handleSearch(String text, String city) {
+  Future handleSearch(String text, String city, String time) {
     return http.post(
-      API_URL + '/post/search?city=${city.toLowerCase()}&time=a-t',
+      API_URL + '/post/search?city=${city.toLowerCase()}&time=$time',
       headers: headers,
       body: jsonEncode(<String, String>{
       'search': text,

@@ -2,7 +2,6 @@ import 'package:bazzar/Providers/providers.dart';
 import 'package:bazzar/screens/profile.dart';
 import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bazzar/widgets/widgets.dart';
@@ -18,6 +17,8 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   int _current = 0;
+  bool liked = false;
+  String commentText = '';
 
   @override
   void initState() {
@@ -31,60 +32,17 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     final providerPost = Provider.of<SinglePostProvider>(context, listen: true);
+    final providerUser = Provider.of<UserProvider>(context, listen: true);
     final post = providerPost.getSinglePost;
-    final _account =
-        Provider.of<UserProvider>(context, listen: false).getAccount;
-    final List<dynamic> imgList =
-        post != null ? post['images'] : [widget.postImg];
-
-    final List<Widget> imageSliders = imgList
-        .map((item) => Container(
-              child: Center(
-                child: Container(
-                  margin: EdgeInsets.all(5.0),
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      child: Image.network(item.replaceAll('https', 'http'),
-                          fit: BoxFit.cover, width: 1000.0)),
-                ),
-              ),
-            ))
-        .toList();
-
-    String commentText = '';
-
-    // String readTimestamp(int timestamp) {
-    // var now = DateTime.now();
-    // var format = DateFormat('HH:mm a');
-    // var date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    // var diff = now.difference(date);
-    // var time = '';
-
-    // if (diff.inSeconds <= 0 || diff.inSeconds > 0 && diff.inMinutes == 0 || diff.inMinutes > 0 && diff.inHours == 0 || diff.inHours > 0 && diff.inDays == 0) {
-    //   time = format.format(date);
-    // } else if (diff.inDays > 0 && diff.inDays < 7) {
-    //   if (diff.inDays == 1) {
-    //     time = diff.inDays.toString() + ' DAY AGO';
-    //   } else {
-    //     time = diff.inDays.toString() + ' DAYS AGO';
-    //   }
-    // } else {
-    //   if (diff.inDays == 7) {
-    //     time = (diff.inDays / 7).floor().toString() + ' WEEK AGO';
-    //   } else {
-
-    //     time = (diff.inDays / 7).floor().toString() + ' WEEKS AGO';
-    //   }
-    // }
-
-    // return time;
-    // }
+    final _account = providerUser.getAccount;
 
     final List<Widget> comments = post != null && post['comments'].length > 0
         ? post['comments']
             .map<Widget>((comment) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(children: [
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     PhotoHero(
                       photo: comment['user']['profileImg']
                           .replaceAll('https', 'http'),
@@ -109,6 +67,7 @@ class _PostScreenState extends State<PostScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -123,15 +82,11 @@ class _PostScreenState extends State<PostScreen> {
                               Text(comment['createdAt']),
                             ],
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                comment['description'],
-                                style: TextStyle(
-                                  fontFamily: 'OpenSans',
-                                ),
-                              )
-                            ],
+                          Text(
+                            comment['description'],
+                            style: TextStyle(
+                              fontFamily: 'OpenSans',
+                            ),
                           )
                         ],
                       ),
@@ -144,6 +99,12 @@ class _PostScreenState extends State<PostScreen> {
     void setCommentText(String text) {
       setState(() {
         commentText = text;
+      });
+    }
+
+    void setIndex(int index){
+      setState(() {
+        _current = index;
       });
     }
 
@@ -165,104 +126,36 @@ class _PostScreenState extends State<PostScreen> {
 
     return Scaffold(
         backgroundColor: Colors.grey[300],
-        appBar: AppBar(
-          title: Text(
-            post != null ? post['title'] : 'Loading..',
-            style:
-                TextStyle(fontFamily: 'OpenSans', fontWeight: FontWeight.w600),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.brown[400],
-          actions: [
-            providerPost.spLoading
-                ? Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                    child: SizedBox(
-                      width: 25,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation(Colors.black54),
-                      ),
-                    ),
-                  )
-                : Container()
-          ],
-        ),
         // only reason for using the Layoutbuilder is to make the loader expand to the remaining height
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
-          child: LayoutBuilder(builder: (context, constraint) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.only(
-                            top: 10,
-                            bottom: 5,
-                            left: 10,
-                            right: 10,
-                          ),
-                          color: Colors.white,
-                          child: Text(
-                            post != null ? post['title'] : '',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 17,
-                              fontFamily: 'OpenSans',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: CarouselSlider(
-                      items: imageSliders,
-                      options: CarouselOptions(
-                          aspectRatio: 16 / 11,
-                          viewportFraction: 0.9,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _current = index;
-                            });
-                          }),
-                    ),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: imgList.map((url) {
-                        int index = imgList.indexOf(url);
-                        return Container(
-                          width: 8.0,
-                          height: 8.0,
-                          margin: EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 2.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _current == index
-                                ? Color.fromRGBO(141, 110, 99, 0.9)
-                                : Color.fromRGBO(141, 110, 99, 0.4),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  post != null
-                      ? Column(
+          child: SafeArea(
+              child: CustomScrollView(
+            slivers: [
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: SliverHeader(
+                  providerPost: providerPost,
+                  providerUser: providerUser,
+                  postImg: widget.postImg,
+                  setIndex: setIndex,
+                  currentIndex: _current,
+                  minExtent: 100,
+                  maxExtent: 270,
+                )
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 10,
+                ),
+              ),
+              post != null && _account != null
+                  ? SliverToBoxAdapter(
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: [
-                            SizedBox(
-                              height: 10,
-                            ),
                             Row(
                               children: [
                                 Expanded(
@@ -271,9 +164,9 @@ class _PostScreenState extends State<PostScreen> {
                                   padding: EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 10),
                                   child: Text(
-                                    'Description',
+                                    post['title'],
                                     style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 17,
                                         fontWeight: FontWeight.w600),
                                   ),
                                 ))
@@ -337,28 +230,15 @@ class _PostScreenState extends State<PostScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            providerPost
-                                                .handleLike(widget.postId);
-                                          },
-                                          child: Icon(
-                                            Icons.date_range,
-                                            size: 15,
-                                          ),
+                                        Icon(
+                                          Icons.date_range,
+                                          size: 15,
                                         ),
                                         SizedBox(
                                           width: 1,
                                         ),
                                         Text('Submitted: 2 months ago'),
                                       ]),
-                                      // Row(children: [
-                                      //   Icon(
-                                      //     Icons.equalizer,
-                                      //     size: 15,
-                                      //   ),
-                                      //   Text('Views: ${post['views']}'),
-                                      // ])
                                     ],
                                   ),
                                 ],
@@ -474,7 +354,8 @@ class _PostScreenState extends State<PostScreen> {
                                         Expanded(
                                           child: GestureDetector(
                                             onTap: () {
-                                              _settingModalBottomSheet(context);
+                                              _settingModalBottomSheet(
+                                                  context);
                                             },
                                             child: Container(
                                               height: 35,
@@ -487,7 +368,8 @@ class _PostScreenState extends State<PostScreen> {
                                                 ),
                                               ),
                                               padding: EdgeInsets.symmetric(
-                                                  vertical: 8, horizontal: 10),
+                                                  vertical: 8,
+                                                  horizontal: 10),
                                               child: Text('Post a comment'),
                                             ),
                                           ),
@@ -499,16 +381,14 @@ class _PostScreenState extends State<PostScreen> {
                               ),
                             ),
                           ],
-                        )
-                      : ConstrainedBox(
-                          constraints: BoxConstraints(
-                              minHeight: constraint.maxHeight - 290),
-                          child: Loading(),
                         ),
-                ],
-              ),
-            );
-          }),
+                      ),
+                    )
+                  : SliverFillRemaining(
+                      child: Loading(),
+                    ),
+            ],
+          )),
         ));
   }
 }

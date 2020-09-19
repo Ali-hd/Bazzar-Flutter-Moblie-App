@@ -30,24 +30,23 @@ class SinglePostProvider with ChangeNotifier {
     });
   }
 
-  String handleLike(String postId) {
-    API().likePost(postId).then((res) {
-      String type = jsonDecode(res.body)['msg'];
+  Future handleLike(String postId) async {
+    try {
+      dynamic response = await API().likePost(postId);
+      String type = jsonDecode(response.body)['msg'];
       Map<String, dynamic> postCopy = _singlePost;
-      print(type);
+      print('res of liked = $type');
       if (type == "liked") {
         postCopy['likes']++;
       } else {
         postCopy['likes']--;
       }
-      _singlePost = postCopy;
       notifyListeners();
-      print(_singlePost);
       return type;
-    }).catchError((err) {
+    } catch (err) {
       print('error liking post $err');
       return 'error';
-    });
+    }
   }
 
   void setSPLoading(bool value) {

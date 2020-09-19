@@ -39,6 +39,17 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
     });
   }
+
+  handlePostLike(String likeType, String postId){
+    // Map<String, dynamic> accountCopy = _account;
+    if(likeType == 'liked'){
+      _account['liked'].add(postId);
+    }else if(likeType == 'unliked'){
+      _account['liked'].removeWhere((post) => post == postId);
+    }
+    print('account from provider $_account');
+    notifyListeners();
+  }
   
   setAccount(Map<String, dynamic> value){
     _account = value;

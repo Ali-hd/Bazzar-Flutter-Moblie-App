@@ -71,6 +71,7 @@ class PostBottomSheet extends StatelessWidget {
             keyboardType: TextInputType.multiline,
             textAlign: TextAlign.start,
             cursorWidth: 1,
+            autocorrect: false,
             decoration: InputDecoration(
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey, width: 2),

@@ -30,7 +30,7 @@ class CitiesFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final providerPost = Provider.of<PostProvider>(context, listen: true);
     return Container(
-      height: 60,
+      height: 50,
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
       child: Center(
@@ -58,7 +58,7 @@ class CitiesFilter extends StatelessWidget {
                             ),
                           )
                         : null,
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     child: Text(
                       cities[index],
                       style:

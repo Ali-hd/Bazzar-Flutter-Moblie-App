@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:bazzar/services/api.dart';
 
@@ -14,11 +13,12 @@ class PostProvider with ChangeNotifier {
   String _currentCity = 'All';
   String get getCurrentCity => _currentCity;
   int _currentPage = 1;
+  String time = 'a-t';
 
   Future fetchPosts() {
     setLoading(true);
     print('helllooo');
-    API().getPosts(_currentCity, _currentPage).then((res) {
+    API().getPosts(_currentCity, _currentPage, time).then((res) {
       if (res.statusCode == 200) {
         setLoading(false);
         if (_posts == null || _currentPage == 1) {
@@ -37,20 +37,20 @@ class PostProvider with ChangeNotifier {
     });
   }
 
-  Future searchPosts(String text){
+  Future searchPosts(String text) {
     setSearchLoading(true);
     notifyListeners();
-    API().handleSearch(text, _currentCity).then((res){
+    API().handleSearch(text, _currentCity, time).then((res) {
       if (_posts == null || _currentPage == 1) {
-          setPosts(jsonDecode(res.body), false);
-        } else if (_currentPage > 1) {
-          // merge old posts with new posts
-          setPosts(jsonDecode(res.body), true);
-        }
-        setSearchLoading(false);
-    }).catchError((err){
-        print('error getting posts $err');
-        setSearchLoading(false);
+        setPosts(jsonDecode(res.body), false);
+      } else if (_currentPage > 1) {
+        // merge old posts with new posts
+        setPosts(jsonDecode(res.body), true);
+      }
+      setSearchLoading(false);
+    }).catchError((err) {
+      print('error getting posts $err');
+      setSearchLoading(false);
     });
   }
 
@@ -59,6 +59,42 @@ class PostProvider with ChangeNotifier {
     _currentPage = 1;
     fetchPosts();
     notifyListeners();
+  }
+
+  void setTime(String value) {
+    String type;
+    switch (value) {
+      case 'All Time':
+        {
+          type = 'a-t';
+        }
+        break;
+      case 'Past month':
+        {
+          type = 'l-m';
+        }
+        break;
+      case 'Past week':
+        {
+           type = 'l-w';
+        }
+        break;
+      case 'Past 24 hours':
+        {
+           type = 'l-d';
+        }
+        break;
+      default:
+        {
+          type = time;
+        }
+        break;
+    }
+    if (time != type) {
+      time = type;
+      fetchPosts();
+      notifyListeners();
+    }
   }
 
   void loadMore() {
@@ -72,7 +108,7 @@ class PostProvider with ChangeNotifier {
     loading = value;
   }
 
-  void setSearchLoading(bool value){
+  void setSearchLoading(bool value) {
     searchLoading = value;
   }
 

@@ -13,7 +13,7 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(top: 10),
       child: Material(
         color: Colors.white,
         child: InkWell(

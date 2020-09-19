@@ -5,16 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
-class Home extends StatelessWidget {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   print('component mounted');
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     Provider.of<PostProvider>(context, listen: false)
-  //     .fetchPosts();
-  //    });
-  // }
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +29,7 @@ class Home extends StatelessWidget {
     final List data = providerPost.getPostsResults;
     print('posts from provider => ${providerPost.getPosts}');
     print('WIDGET BUILD HOME');
-    // ScrollController _scrollController = ScrollController();
-    // @override
-    // void dispose(){
-    //   _scrollController.dispose();
-    //   super.dispose();
-    // }
+
     return Scaffold(
         body: GestureDetector(
       onTap: () {
@@ -120,6 +114,9 @@ class Home extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: CitiesFilter(),
+            ),
+            SliverToBoxAdapter(
+              child: TimeFilter(),
             ),
             !providerPost.getLoading
                 ? SliverList(
