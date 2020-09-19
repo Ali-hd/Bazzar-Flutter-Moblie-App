@@ -9,37 +9,20 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
 
-  int _selectedIndex = 0;
+  int _currentTab = 0;
 
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Index 0: Home',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _currentTab = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      backgroundColor: Colors.grey[300],
+      body: _buildBody(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -61,4 +44,28 @@ class _NavigationState extends State<Navigation> {
       ),
     ); 
   }
+
+  Widget _buildBody(){
+    return Container(
+    color: TabHelper.color(TabItem.red),
+    alignment: Alignment.center,
+    child: FlatButton(
+      child: Text(
+        'PUSH',
+        style: TextStyle(fontSize: 32.0, color: Colors.white),
+      ),
+      onPressed: _push,
+    )
+  );
+  }
+
+  void _push() {
+  Navigator.of(context).push(MaterialPageRoute(
+    // we'll look at ColorDetailPage later
+    builder: (context) => ColorDetailPage(
+      color: Colors.green,
+      title: 'heelo ',
+    ),
+  ));
+
 }

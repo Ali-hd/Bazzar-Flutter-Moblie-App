@@ -10,7 +10,6 @@ class TimeFilter extends StatefulWidget {
 class _TimeFilterState extends State<TimeFilter> {
   final List<String> textList = [
     'All Time',
-    'Past 3 months',
     'Past month',
     'Past week',
     'Past 24 hours'

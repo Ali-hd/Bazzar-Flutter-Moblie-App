@@ -147,7 +147,7 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
             child: InkWell(
               onTap: () async {
                 if (_account != null && post != null) {
-                  String likeType = await providerPost.handleLike(postImg);
+                  String likeType = await providerPost.handleLike(post['_id']);
                   print('like type = $likeType');
                   providerUser.handlePostLike(likeType, post['_id']);
                 }

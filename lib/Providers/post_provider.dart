@@ -65,33 +65,24 @@ class PostProvider with ChangeNotifier {
     String type;
     switch (value) {
       case 'All Time':
-        {
           type = 'a-t';
-        }
         break;
       case 'Past month':
-        {
           type = 'l-m';
-        }
         break;
       case 'Past week':
-        {
            type = 'l-w';
-        }
         break;
       case 'Past 24 hours':
-        {
            type = 'l-d';
-        }
         break;
       default:
-        {
           type = time;
-        }
         break;
     }
     if (time != type) {
       time = type;
+      _currentPage = 1;
       fetchPosts();
       notifyListeners();
     }

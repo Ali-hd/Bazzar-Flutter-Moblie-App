@@ -17,7 +17,6 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   int _current = 0;
-  bool liked = false;
   String commentText = '';
 
   @override
@@ -238,6 +237,16 @@ class _PostScreenState extends State<PostScreen> {
                                           width: 1,
                                         ),
                                         Text('Submitted: 2 months ago'),
+                                      ]),
+                                      Row(children: [
+                                        Icon(
+                                          Icons.favorite_border,
+                                          size: 15,
+                                        ),
+                                        SizedBox(
+                                          width: 1,
+                                        ),
+                                        Text('Likes: ${post['likes']}'),
                                       ]),
                                     ],
                                   ),
