@@ -1,3 +1,4 @@
+import 'package:bazzar/screens/sell.dart';
 import 'package:flutter/material.dart';
 import 'package:bazzar/screens/home.dart';
 import 'package:bazzar/screens/profile.dart';
@@ -41,7 +42,7 @@ class _BottomNavigationBarControllerState
           onGenerateRoute: (RouteSettings settings){
             return PageRouteBuilder(pageBuilder: (context, animiX, animiY) {  // use page PageRouteBuilder instead of 'PageRouteBuilder' to avoid material route animation
               navStack[1] = context;
-              return SettingsPage();
+              return SellScreen();
             });
           }),
     ];
@@ -60,8 +61,8 @@ class _BottomNavigationBarControllerState
     ),
     BottomNavigationBarRootItem(
       bottomNavigationBarItem: BottomNavigationBarItem(
-        icon: Icon(Icons.settings),
-        title: Text('Settings'),
+        icon: Icon(Icons.add),
+        title: Text('Sell'),
       ),
     ),
   ];
@@ -169,36 +170,36 @@ class HomeNavigator extends NestedNavigator {
 ////
 /* convert it to statfull so i can use AutomaticKeepAliveClientMixin to avoid disposing tap */
 
-class SettingsPage extends StatefulWidget {
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
+// class SettingsPage extends StatefulWidget {
+//   @override
+//   _SettingsPageState createState() => _SettingsPageState();
+// }
 
-class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClientMixin{
+// class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClientMixin{
 
-  @override
-  // implement wantKeepAlive
-  bool get wantKeepAlive => true;
+//   @override
+//   // implement wantKeepAlive
+//   bool get wantKeepAlive => true;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings Page'),
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            Center(
-              child: Text('Settings Page'),
-            ),
-            FlatButton(onPressed: (){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => PostScreen()));
-          }, child: Text('go to sub home page'))
-          ],
-        ),
-      ),
-    );
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Settings Page'),
+//       ),
+//       body: Container(
+//         child: Column(
+//           children: [
+//             Center(
+//               child: Text('Settings Page'),
+//             ),
+//             FlatButton(onPressed: (){
+//             Navigator.of(context).push(MaterialPageRoute(builder: (context) => PostScreen()));
+//           }, child: Text('go to sub home page'))
+//           ],
+//         ),
+//       ),
+//     );
+//   }
 
-}
+// }
