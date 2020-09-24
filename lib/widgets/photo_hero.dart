@@ -35,8 +35,20 @@ class PhotoHero extends StatelessWidget {
                       DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
-              placeholder: (context, url) => Container(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
+              placeholder: (context, url) => Container(
+                padding: EdgeInsets.all(40),
+                width: width,
+                height: width,
+                decoration: BoxDecoration(shape: BoxShape.circle),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(const Color(0xFF8D6E63)),
+                ),
+              ),
+              errorWidget: (context, url, error) => CircleAvatar(
+                radius: 55,
+                backgroundImage:
+                    NetworkImage('https://i.imgur.com/iV7Sdgm.jpg'),
+              ),
             ),
           ),
         ),

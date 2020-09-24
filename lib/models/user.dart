@@ -46,6 +46,46 @@ class User {
   });
 }
 
+class EditProfile {
+  String firstname;
+  String description;
+  String location;
+  String profileImg;
+
+  EditProfile({
+    this.firstname,
+    this.description,
+    this.location,
+    this.profileImg
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "firstname": firstname,
+      "description": description,
+      "location": location,
+      "profileImg": profileImg
+    };
+  }
+}
+
+class ReviewUser {
+  double star;
+  String description;
+
+  ReviewUser({
+    this.star,
+    this.description
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "star": star,
+      "description": description
+    };
+  }
+}
+
 // factory User.fromJson(Map<String, dynamic> jsonData) {
 //     Map<String, dynamic> map = {
 //       ...jsonData, // add all of jsonData key-value pairs to the map

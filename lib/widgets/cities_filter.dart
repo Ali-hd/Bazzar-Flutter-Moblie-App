@@ -1,30 +1,10 @@
 import 'package:bazzar/Providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:bazzar/shared/data.dart';
 
 class CitiesFilter extends StatelessWidget {
-  static const List<String> cities = [
-    'All',
-    'Riyadh',
-    'Jeddah',
-    'Makkah',
-    'Qatif',
-    'Yanbu',
-    'Hafr Al-Batin',
-    'Taif',
-    'Tabuk',
-    'Buraydah',
-    'Unaizah',
-    'Jubail',
-    'Jizan',
-    'Al Jawf',
-    'Hofuf',
-    'Gurayat',
-    'Dhahran',
-    'Bisha',
-    'Arar',
-    'Abha'
-  ];
+  
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +33,7 @@ class CitiesFilter extends StatelessWidget {
                             border: Border(
                               bottom: BorderSide(
                                 width: 2,
-                                color: Colors.brown[400],
+                                color: const Color(0xFF8D6E63),
                               ),
                             ),
                           )

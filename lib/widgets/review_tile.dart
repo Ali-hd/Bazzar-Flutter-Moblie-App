@@ -1,3 +1,4 @@
+import 'package:bazzar/screens/profile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
@@ -13,18 +14,32 @@ class ReviewTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CachedNetworkImage(
-            imageUrl: review['userImg'],
-            imageBuilder: (context, imageProvider) => Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileScreen(
+                      username: review['username'],
+                      profileImg: review['userImg'].replaceAll('https', 'http'),
+                      heroIndex: review['date']),
+                ),
+              );
+            },
+            child: CachedNetworkImage(
+              imageUrl: review['userImg'],
+              imageBuilder: (context, imageProvider) => Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
               ),
+              placeholder: (context, url) => Container(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
-            placeholder: (context, url) => Container(),
-            errorWidget: (context, url, error) => Icon(Icons.error),
           ),
           SizedBox(
             width: 10,
@@ -62,10 +77,7 @@ class ReviewTile extends StatelessWidget {
               allowHalfRating: true,
               spacing: 2.0,
               color: Colors.yellow,
-              // onRated: (value) {
-              //   print("rating value -> $value");
-              //   // print("rating value dd -> ${value.truncate()}");
-              // },
+              borderColor: Colors.yellow,
             )
           ])
         ],

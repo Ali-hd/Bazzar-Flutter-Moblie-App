@@ -46,7 +46,7 @@ class PostBottomSheet extends StatelessWidget {
                       border: Border.all(color: Colors.grey[600]),
                       borderRadius:
                           const BorderRadius.all(const Radius.circular(4)),
-                      color: Colors.brown[400],
+                      color: const Color(0xFF8D6E63),
                     ),
                     child: Center(
                       child: Text(

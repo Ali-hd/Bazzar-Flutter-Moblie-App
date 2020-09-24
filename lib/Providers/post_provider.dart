@@ -15,8 +15,10 @@ class PostProvider with ChangeNotifier {
   int _currentPage = 1;
   String time = 'a-t';
 
-  Future fetchPosts() {
+  Future<bool> fetchPosts() {
     setLoading(true);
+    // notifyListeners();
+    // when set state as soon as I load it creates an error
     print('helllooo');
     API().getPosts(_currentCity, _currentPage, time).then((res) {
       if (res.statusCode == 200) {
@@ -30,10 +32,12 @@ class PostProvider with ChangeNotifier {
       } else {
         print(res.statusCode);
       }
+      return true;
     }).catchError((err) {
       print('error getting posts $err');
       setLoading(false);
       notifyListeners();
+      return true;
     });
   }
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bazzar/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:bazzar/services/api.dart';
 
@@ -30,13 +31,33 @@ class UserProvider with ChangeNotifier {
     print('getting user');
     API().getUser(username).then((res){
       setUser(jsonDecode(res.body)['user']);
-      print(jsonDecode(res.body)['user']);
       setLoading(false);
       notifyListeners();
     }).catchError((err){
       print('error getting user $err');
       setLoading(false);
       notifyListeners();
+    });
+  }
+
+  Future editProfile(String username, EditProfile data){
+    setLoading(true);
+    API().editProfile(username, data).then((res){
+      print(res.statusCode);
+      print(jsonDecode(res.body));
+      if(res.statusCode == 200){
+        // merge new details with present.
+        print('merge coin');
+        Map<String, dynamic> copyUser = _user..addAll(data.toJson());
+        _user = copyUser;
+        setLoading(false);
+        notifyListeners();
+      }
+      return true;
+    }).catchError((err){
+      setLoading(false);
+      notifyListeners();
+      return false;
     });
   }
 

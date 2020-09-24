@@ -7,3 +7,5 @@ export 'cities_filter.dart';
 export 'post_bottom_sheet.dart';
 export 'sliver_header.dart';
 export 'time_filter.dart';
+export 'photo_view.dart';
+export 'profile_settings.dart';

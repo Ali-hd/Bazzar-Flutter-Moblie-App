@@ -33,3 +33,26 @@ class Post {
     this.views
   });
 }
+
+class SellPost {
+  String title;
+  String description;
+  String location;
+  List<String> images;
+
+  SellPost({
+    this.title,
+    this.description,
+    this.location,
+    this.images
+  });
+
+  Map<String, dynamic> toJson(){
+    return {
+      "title": title,
+      "description": description,
+      "location": location,
+      "images": images
+    };
+  }
+}

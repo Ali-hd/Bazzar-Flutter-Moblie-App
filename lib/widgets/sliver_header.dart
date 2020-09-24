@@ -1,4 +1,5 @@
 import 'package:bazzar/Providers/providers.dart';
+import 'package:bazzar/widgets/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,21 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
         )
         .toList();
 
+    void open(BuildContext context, final int index) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GalleryPhotoViewWrapper(
+            galleryItems: imgList,
+            backgroundDecoration: const BoxDecoration(
+              color: Colors.black,
+            ),
+            initialIndex: index,
+          ),
+        ),
+      );
+    }
+
     return Stack(alignment: Alignment.center, children: [
       Container(
         color: Colors.black,
@@ -66,17 +82,22 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
                       setIndex(index);
                     }),
               )
-            : CachedNetworkImage(
-                imageUrl: postImg,
-                imageBuilder: (context, imageProvider) => Container(
-                  height: 270,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: imageProvider, fit: BoxFit.cover),
+            : GestureDetector(
+                onTap: () {
+                  open(context, 0);
+                },
+                child: CachedNetworkImage(
+                  imageUrl: postImg,
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 270,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.cover),
+                    ),
                   ),
+                  placeholder: (context, url) => Container(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
-                placeholder: (context, url) => Container(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
       ),
       imgList.length > 1

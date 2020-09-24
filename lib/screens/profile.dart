@@ -1,9 +1,12 @@
 import 'package:bazzar/Providers/providers.dart';
+import 'package:bazzar/models/models.dart';
+import 'package:bazzar/services/api.dart';
 import 'package:bazzar/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:md2_tab_indicator/md2_tab_indicator.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String username;
@@ -31,7 +34,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String selectedTab = 'Posts';
-
+  double rating = 5.0;
+  String reviewText = '';
   void setTab(tab) {
     Future.delayed(const Duration(milliseconds: 2000), () {
       setState(() {
@@ -44,13 +48,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final providerUser = Provider.of<UserProvider>(context, listen: true);
     final user = providerUser.getUser;
+    final account = providerUser.getAccount;
     print('building profile screen');
     print(user);
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.username),
           centerTitle: false,
-          backgroundColor: Colors.brown[400],
+          backgroundColor: const Color(0xFF8D6E63),
           actions: [
             providerUser.loading
                 ? Padding(
@@ -63,7 +68,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         valueColor: AlwaysStoppedAnimation(Colors.black54),
                       ),
                     ))
-                : Container()
+                : user != null && user['_id'] == account['_id']
+                    ? Container(
+                        child: FlatButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ProfileSettings(
+                                  user: user,
+                                ),
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.settings,
+                              size: 21,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              'Settings',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500),
+                            )),
+                      )
+                    : Container(
+                        child: FlatButton.icon(
+                            onPressed: () {
+                              _openReview(context);
+                            },
+                            icon: Icon(
+                              Icons.rate_review,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              'Rate',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500),
+                            )),
+                      )
           ]),
       body: GestureDetector(
         onTap: () {
@@ -81,7 +126,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: PhotoHero(
                       width: 110,
                       tag: widget.heroIndex,
-                      photo: widget.profileImg,
+                      photo: user == null
+                          ? widget.profileImg
+                          : widget.profileImg != user['profileImg']
+                              ? user['profileImg']
+                              : widget.profileImg,
                     ),
                   ),
                 ],
@@ -176,7 +225,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           horizontal: 10, vertical: 0),
                                       indicator: MD2Indicator(
                                           indicatorHeight: 3,
-                                          indicatorColor: Colors.brown[400],
+                                          indicatorColor:
+                                              const Color(0xFF8D6E63),
                                           indicatorSize:
                                               MD2IndicatorSize.normal),
                                       tabs: [
@@ -295,5 +345,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  void _openReview(context) {
+    showModalBottomSheet(
+        context: context,
+        // isScrollControlled: false,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Stack(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 60),
+                        SmoothStarRating(
+                            allowHalfRating: true,
+                            onRated: (value) {
+                              print('rating value = $value');
+                            },
+                            starCount: 5,
+                            rating: rating,
+                            size: 30,
+                            isReadOnly: false,
+                            filledIconData: Icons.star,
+                            halfFilledIconData: Icons.star_half,
+                            color: Colors.yellow,
+                            borderColor: Colors.yellow,
+                            spacing: 0.0),
+                        SizedBox(height: 15),
+                        TextField(
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(10.0),
+                            labelText: 'How was your experience?',
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            focusColor: const Color(0xFF8D6E63),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(width: 2, color: Colors.black54),
+                            ),
+                          ),
+                          cursorColor: const Color(0xFF8D6E63),
+                          maxLines: null,
+                          onChanged: (text) {
+                            reviewText = text;
+                          },
+                        )
+                      ]),
+                ),
+                Positioned(
+                  left: 5,
+                  top: 5,
+                  child: ClipOval(
+                    child: Material(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: Icon(Icons.close),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 20,
+                  top: 20,
+                  child: SizedBox(
+                    width: 80,
+                    height: 30,
+                    child: RaisedButton(
+                      onPressed: () async {
+                        final values =
+                            ReviewUser(star: rating, description: reviewText);
+                        dynamic response = await API().rateUser(
+                            Provider.of<UserProvider>(context, listen: false)
+                                .getUser['username'],
+                            values);
+                        print(response.body);
+                        Navigator.pop(context);
+                      },
+                      color: const Color(0xFF8D6E63),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
+                      child: Text(
+                        'Submit',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          );
+        });
   }
 }
