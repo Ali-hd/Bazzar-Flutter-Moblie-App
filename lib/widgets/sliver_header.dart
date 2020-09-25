@@ -31,41 +31,29 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
     final _account = providerUser.getAccount;
     final List<dynamic> imgList = post != null ? post['images'] : [postImg];
 
+    void open(BuildContext context, final int index) {
+    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
+      builder: (context) => GalleryPhotoViewWrapper(
+        galleryItems: imgList,
+        backgroundDecoration: const BoxDecoration(
+          color: Colors.black,
+        ),
+        initialIndex: index,
+        scrollDirection: Axis.horizontal,
+      ),
+    ));
+  }
+
     final List<Widget> imageSliders = imgList
         .map(
-          (item) => Container(
-            child: Center(
-              child: CachedNetworkImage(
-                imageUrl: item.replaceAll('https', 'http'),
-                imageBuilder: (context, imageProvider) => Container(
-                  height: 270,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: imageProvider, fit: BoxFit.cover),
-                  ),
-                ),
-                placeholder: (context, url) => Container(),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
-            ),
+          (item) => GalleryCarouselItem(
+            imagePath: item.replaceAll('https', 'http'),
+            onTap: (){
+              open(context, currentIndex);
+            }
           ),
         )
         .toList();
-
-    void open(BuildContext context, final int index) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GalleryPhotoViewWrapper(
-            galleryItems: imgList,
-            backgroundDecoration: const BoxDecoration(
-              color: Colors.black,
-            ),
-            initialIndex: index,
-          ),
-        ),
-      );
-    }
 
     return Stack(alignment: Alignment.center, children: [
       Container(

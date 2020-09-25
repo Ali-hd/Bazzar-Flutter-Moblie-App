@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bazzar/Providers/providers.dart';
 import 'package:bazzar/models/post.dart';
+import 'package:bazzar/screens/profile.dart';
 import 'package:bazzar/services/api.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:bazzar/shared/data.dart';
 import 'package:bazzar/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class SellScreen extends StatefulWidget {
   @override
@@ -29,12 +32,13 @@ class _SellScreenState extends State<SellScreen>
 
   @override
   Widget build(BuildContext context) {
+    final account = Provider.of<UserProvider>(context, listen: false).getAccount;
     _submitForm(Map values) async {
       print(values);
       final data = SellPost(
           title: values['title'],
           description: values['description'].trim(),
-          location: values['location'],
+          location: values['location'].toLowerCase(),
           images: images);
       dynamic response = await API().sellPost(data);
       if (jsonDecode(response.body)['msg'] == 'post created successfully') {
@@ -136,6 +140,9 @@ class _SellScreenState extends State<SellScreen>
                       ),
                     ),
                     child: FormBuilderDropdown(
+                      onTap: (){
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                      },
                       attribute: "location",
                       decoration: InputDecoration(
                         contentPadding:
@@ -173,13 +180,13 @@ class _SellScreenState extends State<SellScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildUploadBtn('Take a photo', Icons.add_a_photo,
-                              ImageSource.camera),
+                              ImageSource.camera, account),
                           VerticalDivider(
                             thickness: 1,
                             color: Colors.black54,
                           ),
                           _buildUploadBtn('Choose from gallery',
-                              Icons.photo_library, ImageSource.gallery)
+                              Icons.photo_library, ImageSource.gallery, account)
                         ],
                       ),
                     ),
@@ -234,6 +241,9 @@ class _SellScreenState extends State<SellScreen>
                             ),
                           ),
                           onPressed: () async {
+                            if(account == null){
+                                return showAlertAuth(context);
+                              }
                             if (loading) {
                               return false;
                             }
@@ -269,12 +279,6 @@ class _SellScreenState extends State<SellScreen>
     // child: imagePath != null ? Image.file(imagePath) : Text('Loading')
   }
 
-  void onPageChanged(int index) {
-    setState(() {
-      currentIndex = index;
-    });
-  }
-
   void showAlert(BuildContext context, bool success) {
     showDialog(
         context: context,
@@ -294,6 +298,39 @@ class _SellScreenState extends State<SellScreen>
             ));
   }
 
+  void showAlertAuth(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              // title: ,
+              content: Text('Please Sign In to use this feature'),
+              actions: [
+                FlatButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                FlatButton(
+                  child: Text("Sign In"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProfileScreen(
+                            username: 'Please login',
+                            profileImg: 'https://i.imgur.com/iV7Sdgm.jpg',
+                            heroIndex: 'user_profile'),
+                      ),
+                    ).then((result) {
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+              ],
+            ));
+  }
+
   void open(BuildContext context, final int index) {
     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
       builder: (context) => GalleryPhotoViewWrapper(
@@ -307,7 +344,7 @@ class _SellScreenState extends State<SellScreen>
     ));
   }
 
-  Widget _buildUploadBtn(String text, IconData icon, ImageSource source) {
+  Widget _buildUploadBtn(String text, IconData icon, ImageSource source, Map<String, dynamic> account) {
     return Expanded(
       flex: 1,
       child: Column(
@@ -316,14 +353,18 @@ class _SellScreenState extends State<SellScreen>
             child: Material(
               child: InkWell(
                 onTap: () async {
-                  PickedFile pickedFile =
-                      await ImagePicker().getImage(source: source);
-                  setState(() {
-                    // imagePath = File(pickedFile.path);
-                    loading = true;
-                  });
+                  if(account == null){
+                     return showAlertAuth(context);
+                  }
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  PickedFile pickedFile = await ImagePicker()
+                      .getImage(source: source, imageQuality: 40);
                   print('file page:+===> ${pickedFile.path}');
                   if (pickedFile != null) {
+                    setState(() {
+                      // imagePath = File(pickedFile.path);
+                      loading = true;
+                    });
                     await uploadImage(File(pickedFile.path));
                   }
                 },

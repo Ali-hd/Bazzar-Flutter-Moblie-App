@@ -25,6 +25,7 @@ class PhotoHero extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: CachedNetworkImage(
+              key: ValueKey(photo),
               imageUrl: photo,
               imageBuilder: (context, imageProvider) => Container(
                 width: width,

@@ -1,3 +1,4 @@
+import 'package:bazzar/Providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bazzar/utilities/constants.dart';
@@ -5,14 +6,14 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:bazzar/models/models.dart';
 import 'package:bazzar/services/api.dart';
 import 'package:bazzar/widgets/widgets.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function toggleView;
-
   const LoginScreen({Key key, this.toggleView}) : super(key: key);
-  
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -21,17 +22,22 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   final storage = FlutterSecureStorage();
-  _submitForm(Map values) async {
-    final data = Login(
-      username: values['username'].trim(),
-      password: values['password'].trim(),
-      rememberMe: values['remember_me'],
-    );
-    await API().login(data);
-  }
-
+  _submitForm(Map values, BuildContext context, UserProvider providerUser) async {
+      final data = Login(
+        username: values['username'].trim(),
+        password: values['password'].trim(),
+        rememberMe: values['remember_me'],
+      );
+      String res = await providerUser.handleLogin(data);
+      if(res == 'Signed in'){
+        Phoenix.rebirth(context);
+        // Navigator.pop(context);
+      }
+    }
   @override
   Widget build(BuildContext context) {
+    final providerUser = Provider.of<UserProvider>(context, listen: false);
+
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
@@ -79,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 10,
                         ),
                         _buildRememberMeCheckbox(),
-                        _buildLoginBtn(),
+                        _buildLoginBtn(context, providerUser),
                         _buildSignupBtn(),
                       ],
                     ),
@@ -190,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginBtn() {
+  Widget _buildLoginBtn(BuildContext context, UserProvider providerUser) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
@@ -213,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           onPressed: () async {
             if (_fbKey.currentState.saveAndValidate()) {
-              _submitForm(_fbKey.currentState.value);
+              _submitForm(_fbKey.currentState.value, context, providerUser);
             }
           }),
     );

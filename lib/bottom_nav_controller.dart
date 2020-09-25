@@ -18,9 +18,10 @@ class BottomNavigationBarController extends StatefulWidget {
 class _BottomNavigationBarControllerState
     extends State<BottomNavigationBarController>
     with SingleTickerProviderStateMixin {
+      
   int _selectedIndex = 0;
   List<int> _history = [0];
-  String username;
+  String username = 'Please login';
   String profileImg;
   GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   TabController _tabController;
@@ -105,13 +106,13 @@ class _BottomNavigationBarControllerState
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           print('snapshot token data ====> $snapshot');
-          if(!snapshot.data['isExpired'] && username == null){
+          if(!snapshot.data['isExpired'] && username == 'Please login'){
             username = snapshot.data['decoded']['username'];
           }
           //is expired = true
-          if (snapshot.data['isExpired']) {
-            return Center(child: Text('expired'));
-          } else {
+          // if (snapshot.data['isExpired']) {
+          //   return Center(child: Text('expired'));
+          // } else {
             return WillPopScope(
               child: Scaffold(
                 body: TabBarView(
@@ -154,9 +155,9 @@ class _BottomNavigationBarControllerState
                 }
               },
             );
-          }
+          // }
         } else {
-          return Loading();
+          return Loading(backgroundColor: Colors.white,);
         }
       },
     );

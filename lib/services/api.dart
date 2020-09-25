@@ -25,32 +25,22 @@ class API {
     return header;
   }
 
-  Future<User> login(Login values) {
+  Future login(Login values) {
     return http
         .post(
       API_URL + '/auth/login',
       body: json.encode(values.toJson()),
       headers: headers,
-    )
-        .then((res) async {
-      await storage.write(key: 'token', value: jsonDecode(res.body)['token']);
-      print(res.statusCode);
-      print(jsonDecode(res.body));
-      print(jsonDecode(res.body)['token']);
-    }).catchError((err) => print(err));
+    );
   }
 
-  Future<User> register(Register values) {
+  Future register(Register values) {
     return http
         .post(
       API_URL + '/auth/register',
       body: json.encode(values.toJson()),
       headers: headers,
-    )
-        .then((res) {
-      print(res.statusCode);
-      print(jsonDecode(res.body));
-    }).catchError((err) => print(err));
+    );
   }
 
   Future getPosts(String city, int page, String time) {

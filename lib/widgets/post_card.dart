@@ -18,6 +18,7 @@ class PostCard extends StatelessWidget {
         color: Colors.white,
         child: InkWell(
           onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
             Navigator.push(
                 context,
                 MaterialPageRoute(

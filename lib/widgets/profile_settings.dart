@@ -6,6 +6,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:bazzar/services/api.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +33,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   @override
   Widget build(BuildContext context) {
+    print('profile settings user = ${widget.user}');
     final providerUser = Provider.of<UserProvider>(context, listen: false);
     _submitForm(Map values) async {
       print(values);
@@ -61,18 +64,27 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipOval(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                        child: Icon(Icons.close),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      child: ClipOval(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              child: Icon(Icons.close),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    _buildSignOutBtn(providerUser)
+                  ],
                 ),
                 FormBuilder(
                   key: _fbKey,
@@ -140,7 +152,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                                 color: Colors.white,
                                               ),
                                             ),
-                                          ))
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -202,7 +214,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 )),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                hintText: 'Enter your $type',
+                hintText: type == 'firstname' ? 'Enter your name' : 'Enter your $type',
                 hintStyle: TextStyle(
                     color: Colors.black54,
                     fontFamily: 'OpenSans',
@@ -238,17 +250,40 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               ),
             ),
             onPressed: () async {
-              // if (loading) {
-              //   return false;
-              // }
-              // if (images.length < 1) {
-              //   setState(() {
-              //     didUploadError = true;
-              //   });
-              // }
               if (_fbKey.currentState.saveAndValidate()) {
                 _submitForm(_fbKey.currentState.value);
               }
+            }),
+      ),
+    );
+  }
+
+  Widget _buildSignOutBtn(UserProvider providerUser) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
+        width: 120,
+        height: 45,
+        child: FlatButton(
+            color: Colors.grey[700],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            // color: Colors.black54,
+            child: Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenSans',
+              ),
+            ),
+            onPressed: () async {
+              final _storage = FlutterSecureStorage();
+              await _storage.delete(key: 'token');
+              await providerUser.handleLogOut();
+              Phoenix.rebirth(context);
             }),
       ),
     );
@@ -295,11 +330,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   }
 
   void _pickImage(ImageSource source) async {
-    PickedFile pickedFile = await ImagePicker().getImage(source: source);
-    setState(() {
-      uploadingImage = true;
-    });
+    PickedFile pickedFile =
+        await ImagePicker().getImage(source: source, imageQuality: 40);
     if (pickedFile != null) {
+      setState(() {
+        uploadingImage = true;
+      });
       uploadImage(File(pickedFile.path));
     }
   }

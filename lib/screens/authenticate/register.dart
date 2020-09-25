@@ -1,12 +1,13 @@
+import 'package:bazzar/Providers/providers.dart';
+import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bazzar/utilities/constants.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:bazzar/models/models.dart';
-import 'package:bazzar/services/api.dart';
-import 'package:bazzar/widgets/widgets.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function toggleView;
@@ -18,82 +19,88 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   final storage = FlutterSecureStorage();
-  _submitForm(Map values) async {
-    // final data = Login(
-    //   username: values['username'].trim(),
-    //   password: values['password'].trim(),
-    //   rememberMe: values['remember_me'],
-    // );
-    // await API().login(data);
-    // await storage.write(key: 'token', value: 'supa secret toekn');
-    String value = await storage.read(key: 'token');
-    bool hasExpired = JwtDecoder.isExpired(value);
-    Map<String, dynamic> decodedToken = JwtDecoder.decode(value);
-    print(decodedToken);
-    print(hasExpired);
-    print(value);
+  _submitForm(Map values, UserProvider providerUser) async {
+    final data = Register(
+      username: values['username'].trim(),
+      email: values['email'],
+      password: values['password'].trim(),
+    );
+    String res = await providerUser.handleRegister(data);
+    if (res == 'success'){
+      // widget.toggleView();
+      Phoenix.rebirth(context);
+    } 
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Stack(
-            children: [
-              Container(
-                height: double.infinity,
-                width: double.infinity,
-              ),
-              Container(
-                height: double.infinity,
-                child: SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(40, 120, 40, 0),
-                  child: FormBuilder(
-                    key: _fbKey,
-                    initialValue: {'username': '', 'email': '', 'password': ''},
-                    // autovalidate: true,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontFamily: 'OpenSans',
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
+    final providerUser = Provider.of<UserProvider>(context, listen: true);
+    if (!providerUser.authLoading) {
+      return Scaffold(
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Stack(
+              children: [
+                Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                ),
+                Container(
+                  height: double.infinity,
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(40, 120, 40, 0),
+                    child: FormBuilder(
+                      key: _fbKey,
+                      initialValue: {
+                        'username': '',
+                        'email': '',
+                        'password': ''
+                      },
+                      // autovalidate: true,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontFamily: 'OpenSans',
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        _buildFormField('username'),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        _buildFormField('email'),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        _buildFormField('password'),
-                        // _buildForgotPasswordBtn(),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        _buildSignupBtn(),
-                        _buildLoginBtn(),
-                      ],
+                          SizedBox(height: 20),
+                          _buildFormField('username'),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          _buildFormField('email'),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          _buildFormField('password'),
+                          // _buildForgotPasswordBtn(),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          _buildSignupBtn(providerUser),
+                          _buildLoginBtn(),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return Loading(backgroundColor: Colors.transparent);
+    }
   }
 
   Widget _buildFormField(String type) {
@@ -149,11 +156,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ]
                 : type == 'email'
                     ? [
-                      FormBuilderValidators.required(
+                        FormBuilderValidators.required(
                             errorText: 'Please enter your Email'),
-                      FormBuilderValidators.email(
+                        FormBuilderValidators.email(
                             errorText: 'Email\'s not valid')
-                    ]
+                      ]
                     : [
                         FormBuilderValidators.required(
                             errorText: 'Please enter your Password')
@@ -164,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildSignupBtn() {
+  Widget _buildSignupBtn(UserProvider providerUser) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
@@ -187,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           onPressed: () async {
             if (_fbKey.currentState.saveAndValidate()) {
-              _submitForm(_fbKey.currentState.value);
+              _submitForm(_fbKey.currentState.value, providerUser);
             }
           }),
     );

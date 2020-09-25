@@ -150,7 +150,7 @@ class _PostScreenState extends State<PostScreen> {
                   height: 10,
                 ),
               ),
-              post != null && _account != null
+              post != null
                   ? SliverToBoxAdapter(
                       child: SingleChildScrollView(
                         child: Column(
@@ -346,7 +346,9 @@ class _PostScreenState extends State<PostScreen> {
                                   Padding(
                                     padding: EdgeInsetsDirectional.only(
                                         bottom: 20, top: 10),
-                                    child: Row(
+                                    child: 
+                                    _account != null ?
+                                    Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
@@ -384,7 +386,7 @@ class _PostScreenState extends State<PostScreen> {
                                           ),
                                         ),
                                       ],
-                                    ),
+                                    ) : Container(),
                                   )
                                 ],
                               ),

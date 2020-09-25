@@ -1,6 +1,7 @@
 import 'package:bazzar/screens/authenticate/authenticate.dart';
 import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import 'package:bazzar/Providers/providers.dart';
 import 'bottom_nav_controller.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(Phoenix(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -37,22 +38,25 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
-        home: FutureBuilder(
-          future: _checktoken(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              //is expired = true
-              if (snapshot.data) {
-                return Authenticate();
-              } else {
-                return BottomNavigationBarController();
-              }
-            } else {
-              return Loading();
-            }
-          },
-        ),
+        home: BottomNavigationBarController(),
       ),
+      // child: MaterialApp(
+      //   home: FutureBuilder(
+      //     future: _checktoken(),
+      //     builder: (context, snapshot) {
+      //       if (snapshot.hasData) {
+      //         //is expired = true
+      //         if (snapshot.data) {
+      //           return Authenticate();
+      //         } else {
+      //           return BottomNavigationBarController();
+      //         }
+      //       } else {
+      //         return Loading();
+      //       }
+      //     },
+      //   ),
+      // ),
     );
   }
 }

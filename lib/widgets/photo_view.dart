@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -105,7 +106,7 @@ class _GalleryPhotoViewWrapperState extends State<GalleryPhotoViewWrapper> {
     return PhotoViewGalleryPageOptions(
       imageProvider: NetworkImage(item),
       initialScale: PhotoViewComputedScale.contained,
-      minScale: PhotoViewComputedScale.contained * (0.5 + index / 10),
+      minScale: PhotoViewComputedScale.contained * 1,
       maxScale: PhotoViewComputedScale.covered * 4.1,
       heroAttributes: PhotoViewHeroAttributes(tag: item),
     );
@@ -128,6 +129,37 @@ class GalleryExampleItem extends StatelessWidget {
             imagePath,
             height: 120.0,
             fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GalleryCarouselItem extends StatelessWidget {
+  GalleryCarouselItem({this.imagePath, this.onTap});
+  final dynamic imagePath;
+  final Function onTap;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Hero(
+          tag: imagePath,
+          child: Center(
+            child: CachedNetworkImage(
+              imageUrl: imagePath,
+              imageBuilder: (context, imageProvider) => Container(
+                height: 270,
+                decoration: BoxDecoration(
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+              placeholder: (context, url) => Container(),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
           ),
         ),
       ),
