@@ -45,9 +45,9 @@ class UserProvider with ChangeNotifier {
     API().getAccount().then((res) {
       if (res.statusCode == 200) {
         setAccount(jsonDecode(res.body)['account']);
-        setLoading(false);
-        notifyListeners();
       }
+      setLoading(false);
+      notifyListeners();
     }).catchError((err) {
       print('error getting account $err');
       setLoading(false);

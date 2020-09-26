@@ -4,29 +4,27 @@ import 'package:flutter/material.dart';
 class AuthBtns extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-          padding: EdgeInsets.only(top: 100),
-          color: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildAuthButton('LOGIN', context),
-              Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      child: Text('OR')),
-                  Expanded(child: Divider())
-                ],
-              ),
-              _buildAuthButton('REGISTER', context),
-            ],
-          )),
-    );
+    return Container(
+        padding: EdgeInsets.only(top: 50),
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildAuthButton('LOGIN', context),
+            Row(
+              children: [
+                Expanded(child: Divider()),
+                Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    child: Text('OR')),
+                Expanded(child: Divider())
+              ],
+            ),
+            _buildAuthButton('REGISTER', context),
+          ],
+        ));
   }
 
   Widget _buildAuthButton(String type, BuildContext context) {

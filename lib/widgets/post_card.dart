@@ -2,6 +2,7 @@ import 'package:bazzar/screens/profile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:bazzar/screens/post.dart';
+import 'package:jiffy/jiffy.dart';
 import 'widgets.dart';
 
 class PostCard extends StatelessWidget {
@@ -71,7 +72,7 @@ class PostCard extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(post['location']),
-                                Text('4 months ago')
+                                Text(Jiffy(post['createdAt']).fromNow())
                               ],
                             )
                           ],

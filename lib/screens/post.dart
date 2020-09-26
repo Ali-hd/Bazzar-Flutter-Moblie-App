@@ -2,7 +2,7 @@ import 'package:bazzar/Providers/providers.dart';
 import 'package:bazzar/screens/profile.dart';
 import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:bazzar/widgets/widgets.dart';
 
@@ -78,7 +78,7 @@ class _PostScreenState extends State<PostScreen> {
                                 ),
                               ),
                               Text(' • '),
-                              Text(comment['createdAt']),
+                              Text(Jiffy(comment['createdAt']).format("MM/d/yyy, hh:mm:ss a")),
                             ],
                           ),
                           Text(
@@ -236,7 +236,7 @@ class _PostScreenState extends State<PostScreen> {
                                         SizedBox(
                                           width: 1,
                                         ),
-                                        Text('Submitted: 2 months ago'),
+                                        Text('Submitted: ${Jiffy(post['createdAt']).format("MMM do yyyy")}')
                                       ]),
                                       Row(children: [
                                         Icon(

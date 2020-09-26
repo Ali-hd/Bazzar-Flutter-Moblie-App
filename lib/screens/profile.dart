@@ -4,6 +4,7 @@ import 'package:bazzar/services/api.dart';
 import 'package:bazzar/shared/loading.dart';
 import 'package:bazzar/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:md2_tab_indicator/md2_tab_indicator.dart';
@@ -24,138 +25,152 @@ class ProfileScreen extends StatefulWidget {
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  String selectedTab = 'Posts';
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
+  TabController controller;
   double rating = 5.0;
   String reviewText = '';
-  void setTab(tab) {
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      setState(() {
-        selectedTab = tab;
-      });
-    });
+
+  @override
+  void initState() {
+    super.initState();
+    final providerUser = Provider.of<UserProvider>(context, listen: false);
+    providerUser.fetchUser(widget.username);
+    controller = TabController(length: 3, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    final providerUser = Provider.of<UserProvider>(context, listen: false);
     print('building profile screen');
+    final providerUser = Provider.of<UserProvider>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-          title: Text(widget.username),
-          centerTitle: false,
-          backgroundColor: const Color(0xFF8D6E63),
-          actions: [
-            Consumer<UserProvider>(
-              builder: (context, providerUser, child) {
-                final user = providerUser.getUser;
+        appBar: AppBar(
+            title: Text(widget.username),
+            centerTitle: false,
+            backgroundColor: const Color(0xFF8D6E63),
+            actions: [
+              Consumer<UserProvider>(
+                builder: (context, providerUser, child) {
+                  final user = providerUser.getUser;
+                  final account = providerUser.getAccount;
+                  if (providerUser.loading) {
+                    return Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                        child: SizedBox(
+                          width: 25,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation(Colors.black54),
+                          ),
+                        ));
+                  } else if (account != null) {
+                    return user != null && user['_id'] == account['_id']
+                        ? Container(
+                            child: FlatButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ProfileSettings(
+                                      user: user,
+                                    ),
+                                  ));
+                                },
+                                icon: Icon(
+                                  Icons.settings,
+                                  size: 21,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Settings',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500),
+                                )),
+                          )
+                        : Container(
+                            child: FlatButton.icon(
+                                onPressed: () {
+                                  _openReview(context);
+                                },
+                                icon: Icon(
+                                  Icons.rate_review,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Rate',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500),
+                                )),
+                          );
+                  } else {
+                    return Container();
+                  }
+                },
+              )
+            ]),
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: NestedScrollView(headerSliverBuilder:
+              (context, innerBoxIsScrolled) {
                 final account = providerUser.getAccount;
-                if (providerUser.loading) {
-                  return Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                      child: SizedBox(
-                        width: 25,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation(Colors.black54),
-                        ),
-                      ));
-                }else if (account != null) {
-                  return user != null && user['_id'] == account['_id']
-                      ? Container(
-                          child: FlatButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => ProfileSettings(
-                                    user: user,
-                                  ),
-                                ));
-                              },
-                              icon: Icon(
-                                Icons.settings,
-                                size: 21,
-                                color: Colors.white,
-                              ),
-                              label: Text(
-                                'Settings',
+            return [
+              SliverOverlapAbsorber(
+                // sliveroverlap and sliver safeArea prevents list item from getting under sliver pinned header
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverSafeArea(
+                  top: false,
+                  sliver: SliverAppBar(
+                    floating: account != null ? true : false,
+                    pinned: account != null ? true : false,
+                    expandedHeight: account != null ? 450 : 200,
+                    backgroundColor: Colors.white,
+                    flexibleSpace: FlexibleSpaceBar(
+                        collapseMode: CollapseMode.parallax,
+                        background: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Consumer<UserProvider>(
+                                  builder: (context, providerUser, child) {
+                                    final user = providerUser.getUser;
+                                    return Container(
+                                      margin:
+                                          EdgeInsets.only(top: 30, bottom: 20),
+                                      child: PhotoHero(
+                                        width: 110,
+                                        tag: widget.heroIndex,
+                                        photo: user == null
+                                            ? widget.profileImg
+                                            : widget.profileImg !=
+                                                    user['profileImg']
+                                                ? user['profileImg']
+                                                : widget.profileImg,
+                                      ),
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
+                            Center(
+                              child: Text(
+                                widget.username == 'Please login'
+                                    ? 'Register to use all bazzar features'
+                                    : widget.username,
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500),
-                              )),
-                        )
-                      : Container(
-                          child: FlatButton.icon(
-                              onPressed: () {
-                                _openReview(context);
-                              },
-                              icon: Icon(
-                                Icons.rate_review,
-                                size: 20,
-                                color: Colors.white,
+                                    fontSize: 20, fontWeight: FontWeight.w600),
                               ),
-                              label: Text(
-                                'Rate',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w500),
-                              )),
-                        );
-                } else {
-                  return Container();
-                }
-              },
-            )
-          ]),
-      body: GestureDetector(onTap: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      }, child: LayoutBuilder(
-        builder: (context, constraint) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraint.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Consumer<UserProvider>(
-                          builder: (context, providerUser, child) {
-                            final user = providerUser.getUser;
-                            return Container(
-                              margin: EdgeInsets.only(top: 30, bottom: 20),
-                              child: PhotoHero(
-                                width: 110,
-                                tag: widget.heroIndex,
-                                photo: user == null
-                                    ? widget.profileImg
-                                    : widget.profileImg != user['profileImg']
-                                        ? user['profileImg']
-                                        : widget.profileImg,
-                              ),
-                            );
-                          },
-                        )
-                      ],
-                    ),
-                    Center(
-                      child:Text(
-                        widget.username == 'Please login' ? 'Register to use all bazzar features' : widget.username,
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    FutureBuilder(
-                        future: providerUser.fetchUser(widget.username),
-                        builder: (context, snapshot) {
-                          print('snapshoot = ${snapshot.data}');
-                          if (snapshot.hasData) {
-                            return Container(child: Consumer<UserProvider>(
+                            ),
+                            Consumer<UserProvider>(
                                 builder: (context, providerUser, child) {
                               final user = providerUser.getUser;
                               if (user != null) {
@@ -208,8 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 color: Colors.grey[700]),
                                           ),
                                           Divider(),
-                                          Text(user['createdAt']
-                                              .substring(0, 10)),
+                                          Text(Jiffy(user['createdAt'])
+                                              .format("MMMM do yyyy")),
                                           SizedBox(
                                             height: 5,
                                           ),
@@ -223,176 +238,146 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     Container(
                                       padding:
-                                          EdgeInsets.symmetric(vertical: 5),
-                                      color: Colors.grey,
+                                          EdgeInsets.symmetric(vertical: 3),
+                                      color: Colors.grey[400],
                                     ),
-                                    Container(
-                                      child: DefaultTabController(
-                                        length: 3,
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.symmetric(
-                                                  vertical: 10),
-                                              height: 40,
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 1),
-                                              child: TabBar(
-                                                labelStyle: TextStyle(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 15),
-                                                indicatorSize:
-                                                    TabBarIndicatorSize.label,
-                                                labelColor: Colors.black87,
-                                                unselectedLabelColor:
-                                                    Color(0xff5f6368),
-                                                isScrollable: true,
-                                                labelPadding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 0),
-                                                indicator: MD2Indicator(
-                                                    indicatorHeight: 3,
-                                                    indicatorColor:
-                                                        const Color(0xFF8D6E63),
-                                                    indicatorSize:
-                                                        MD2IndicatorSize
-                                                            .normal),
-                                                tabs: [
-                                                  GestureDetector(
-                                                    // onTap: () {
-                                                    //   setTab('Posts');
-                                                    // },
-                                                    child: Container(
-                                                      width: 60,
-                                                      padding:
-                                                          EdgeInsets.all(0),
-                                                      child: Center(
-                                                        child: Text(
-                                                          'Posts',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    // onTap: () {
-                                                    //   setTab('Reviews');
-                                                    // },
-                                                    child: Container(
-                                                      width: 60,
-                                                      child: Tab(
-                                                        child: Center(
-                                                          child: Text(
-                                                            'Reviews',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    // onTap: () {
-                                                    //   setTab('Likes');
-                                                    // },
-                                                    child: Container(
-                                                      width: 60,
-                                                      child: Tab(
-                                                        child: Center(
-                                                          child: Text(
-                                                            'Likes',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 5),
-                                              height: (selectedTab == 'Reviews'
-                                                      ? 92
-                                                      : 130 *
-                                                              user['posts']
-                                                                  .length +
-                                                          10)
-                                                  .toDouble(),
-                                              // height: 92,
-                                              child: TabBarView(
-                                                children: [
-                                                  Column(
-                                                    children: user['posts']
-                                                        .map<Widget>(
-                                                          (item) => Column(
-                                                            children: [
-                                                              PostTile(
-                                                                post: item,
-                                                              ),
-                                                              Divider(
-                                                                height: 0,
-                                                              )
-                                                            ],
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                  ),
-                                                  Column(
-                                                    children: user['ratings']
-                                                        .map<Widget>(
-                                                          (item) => Column(
-                                                            children: [
-                                                              ReviewTile(
-                                                                review: item,
-                                                              ),
-                                                              Divider(
-                                                                height: 0,
-                                                              )
-                                                            ],
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                  ),
-                                                  // others uses cant see my liked
-                                                  Icon(Icons.directions_bike),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    )
                                   ],
                                 );
                               } else {
-                                return AuthBtns();
+                                return Container();
                               }
-                            }));
-                          } else {
-                            return Expanded(
-                                child: Loading(
-                                    backgroundColor: Colors.transparent));
-                          }
-                        }),
-                  ],
+                            }),
+                          ],
+                        )),
+                    bottom: PreferredSize(
+                      preferredSize: Size.fromHeight(45),
+                      child: Container(
+                          height: 40,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          color: Colors.white,
+                          child: Consumer<UserProvider>(
+                            builder: (context, providerUser, child) {
+                              final account = providerUser.getAccount;
+                              if (account != null) {
+                                return TabBar(
+                                  controller: controller,
+                                  labelStyle: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15),
+                                  indicatorSize: TabBarIndicatorSize.label,
+                                  labelColor: Colors.black87,
+                                  unselectedLabelColor: Color(0xff5f6368),
+                                  isScrollable: true,
+                                  labelPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 0),
+                                  indicator: MD2Indicator(
+                                      indicatorHeight: 4,
+                                      indicatorColor: const Color(0xFF8D6E63),
+                                      indicatorSize: MD2IndicatorSize.normal),
+                                  tabs: [
+                                    Container(
+                                      width: 60,
+                                      child: Tab(
+                                        child: Center(
+                                          child: Text(
+                                            'Posts',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 60,
+                                      child: Tab(
+                                        child: Center(
+                                          child: Text(
+                                            'Reviews',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 60,
+                                      child: Tab(
+                                        child: Center(
+                                          child: Text(
+                                            'Likes',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }else{
+                                return Container();
+                              }
+                            },
+                          )),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      )),
-    );
+            ];
+          }, body:
+              Consumer<UserProvider>(builder: (context, providerUser, child) {
+            final _account = providerUser.getAccount;
+            final user = providerUser.getUser;
+            if (user != null) {
+              return TabBarView(
+                controller: controller,
+                children: [
+                  ListView.builder(
+                    itemCount: user['posts'].length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          PostTile(
+                            post: user['posts'][index],
+                          ),
+                          Divider(
+                            height: 0,
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                  ListView.builder(
+                    itemCount: user['ratings'].length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          ReviewTile(
+                            review: user['ratings'][index],
+                          ),
+                          Divider(
+                            height: 0,
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                  // others uses cant see my liked
+                  Icon(Icons.directions_bike),
+                ],
+              );
+            } else if (_account == null) {
+              // setState(() {
+              //   expandedHeight = 200;
+              // });
+              return AuthBtns();
+            } else {
+              return Loading(
+                backgroundColor: Colors.transparent,
+              );
+            }
+          })),
+        ));
   }
 
   void _openReview(context) {

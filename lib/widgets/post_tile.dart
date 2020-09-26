@@ -1,11 +1,12 @@
 import 'package:bazzar/screens/post.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 
 class PostTile extends StatelessWidget {
   final Map post;
   const PostTile({Key key, @required this.post}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -73,7 +74,7 @@ class PostTile extends StatelessWidget {
                         SizedBox(
                           height: 5,
                         ),
-                        Text(post['createdAt'].substring(0, 10)),
+                        Text(Jiffy(post['createdAt']).format("MMM do yyyy")),
                       ],
                     ),
                   )

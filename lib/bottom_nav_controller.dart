@@ -3,7 +3,6 @@ import 'package:bazzar/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:bazzar/screens/home.dart';
 import 'package:bazzar/screens/profile.dart';
-import 'package:bazzar/screens/post.dart';
 import 'package:flutter/services.dart';
 import 'package:bazzar/services/check_token.dart';
 
@@ -53,7 +52,6 @@ class _BottomNavigationBarControllerState
           observers: [HeroController(createRectTween: _createRectTween)],
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder(pageBuilder: (context, animiX, animiY) {
-              // use page PageRouteBuilder instead of 'PageRouteBuilder' to avoid material route animation
               navStack[1] = context;
               return SellScreen();
             });
@@ -62,7 +60,6 @@ class _BottomNavigationBarControllerState
           observers: [HeroController(createRectTween: _createRectTween)],
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder(pageBuilder: (context, animiX, animiY) {
-              // use page PageRouteBuilder instead of 'PageRouteBuilder' to avoid material route animation
               navStack[2] = context;
               return ProfileScreen(
                 heroIndex: 'user_profile',
@@ -84,18 +81,24 @@ class _BottomNavigationBarControllerState
         icon: Icon(Icons.home),
         title: Text('Home'),
       ),
+      // routeName: '/',
+      // nestedNavigator: HomeNavigator(navigatorKey: GlobalKey<NavigatorState>())
     ),
     BottomNavigationBarRootItem(
       bottomNavigationBarItem: BottomNavigationBarItem(
         icon: Icon(Icons.add),
         title: Text('Sell'),
       ),
+      // routeName: '/sell',
+      // nestedNavigator: HomeNavigator(navigatorKey: GlobalKey<NavigatorState>())
     ),
     BottomNavigationBarRootItem(
       bottomNavigationBarItem: BottomNavigationBarItem(
         icon: Icon(Icons.person),
         title: Text('Profile'),
       ),
+      // routeName: '/profile',
+      // nestedNavigator: HomeNavigator(navigatorKey: GlobalKey<NavigatorState>())
     ),
   ];
 
@@ -164,6 +167,12 @@ class _BottomNavigationBarControllerState
   }
 
   void _onItemTapped(int index) {
+    if(index == _tabController.index){
+      print('same index');
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+
+    // Navigator.of(context).popUntil((route) => route.isFirst);
     _tabController.index = index;
     setState(() => _selectedIndex = index);
   }
@@ -205,8 +214,11 @@ class HomeNavigator extends NestedNavigator {
           case '/':
             builder = (BuildContext context) => HomeScreen();
             break;
-          case '/home/1':
-            builder = (BuildContext context) => PostScreen();
+          case '/sell':
+            builder = (BuildContext context) => SellScreen();
+            break;
+          case '/profile':
+            builder = (BuildContext context) => ProfileScreen();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
