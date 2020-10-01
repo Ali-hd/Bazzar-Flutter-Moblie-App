@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:bazzar/services/api.dart';
+import 'package:bazzar/models/models.dart';
 
 class PostProvider with ChangeNotifier {
   Map<String, dynamic> _posts;
   Map<String, dynamic> get getPosts => _posts;
-  List _postResults;
-  List get getPostsResults => _postResults;
+  List<Post> _postResults = [];
+  List<Post> get getPostsResults => _postResults;
   bool loading = false;
   bool searchLoading = false;
   bool get getLoading => loading;
@@ -19,15 +20,14 @@ class PostProvider with ChangeNotifier {
     setLoading(true);
     // notifyListeners();
     // when set state as soon as I load it creates an error
-    print('helllooo');
     API().getPosts(_currentCity, _currentPage, time).then((res) {
       if (res.statusCode == 200) {
         setLoading(false);
         if (_posts == null || _currentPage == 1) {
-          setPosts(jsonDecode(res.body), false);
+          setPosts(res.body, false);
         } else if (_currentPage > 1) {
           // merge old posts with new posts
-          setPosts(jsonDecode(res.body), true);
+          setPosts(res.body, true);
         }
       } else {
         print(res.statusCode);
@@ -108,11 +108,13 @@ class PostProvider with ChangeNotifier {
   }
 
   void setPosts(value, bool merge) {
-    _posts = value;
+    _posts = jsonDecode(value);
+    List<dynamic> data = _posts['results'];
+    List<Post> results = data.map((post)=>Post.fromJson(post)).toList();
     if (!merge) {
-      _postResults = value['results'];
+      _postResults = results;
     } else {
-      _postResults = [..._postResults, ...value['results']];
+      _postResults = [..._postResults, ...results];
       print(_postResults);
     }
     notifyListeners();

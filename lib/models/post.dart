@@ -1,10 +1,17 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:bazzar/models/models.dart';
+
+part 'post.g.dart';
+@JsonSerializable(explicitToJson: true)
 class Post {
+  @JsonKey(name: '_id')
   String id;
   bool approved;
   List bids;
+  List<Comment> comments;
   String createdAt;
   String description;
-  List images;
+  List<String> images;
   int likes;
   String location;
   bool open;
@@ -12,13 +19,14 @@ class Post {
   String startBid;
   String title;
   String updatedAt;
-  Map user;
+  User user;
   int views;
 
   Post({
     this.id,
     this.approved,
     this.bids,
+    this.comments,
     this.createdAt,
     this.description,
     this.images,
@@ -30,8 +38,12 @@ class Post {
     this.title,
     this.updatedAt,
     this.user,
-    this.views
+    this.views,
   });
+
+  factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PostToJson(this);
 }
 
 class SellPost {

@@ -4,6 +4,7 @@ import 'package:bazzar/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:bazzar/models/models.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen>
   bool get wantKeepAlive => true;
   bool refreshLoading = false;
   @override
+  // ignore: must_call_super
   Widget build(BuildContext context) {
     final providerPost = Provider.of<PostProvider>(context, listen: true);
     final providerUser = Provider.of<UserProvider>(context, listen: false);
@@ -26,32 +28,25 @@ class _HomeScreenState extends State<HomeScreen>
       providerUser.fetchAccout();
     }
     final Map posts = providerPost.getPosts;
-    final List data = providerPost.getPostsResults;
+    final List<Post> data = providerPost.getPostsResults;
     print('posts from provider => ${providerPost.getPosts}');
     print('WIDGET BUILD HOME');
 
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
+          FocusScope.of(context).unfocus();
         },
         child: Container(
           color: Colors.grey[300],
-          child: RefreshIndicator(
-            onRefresh: () async{
-              setState(() {
-                refreshLoading = true;
-              });
-              dynamic res = await providerPost.fetchPosts();
-              setState(() {
-                refreshLoading = false;
-              });
-            },
-            child: CustomScrollView(
-              slivers: [
+          child: NestedScrollView(
+            floatHeaderSlivers: true,
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
                 SliverAppBar(
                   backgroundColor: Colors.white,
                   floating: true,
+                  pinned: false,
                   actions: [
                     Expanded(
                       flex: 1,
@@ -79,15 +74,15 @@ class _HomeScreenState extends State<HomeScreen>
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10.0),
                               enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(width: 1, color: Colors.grey),
+                                borderSide: BorderSide(
+                                    width: 1, color: Colors.grey),
                                 borderRadius: const BorderRadius.all(
                                   const Radius.circular(8),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(width: 2, color: Colors.black54),
+                                borderSide: BorderSide(
+                                    width: 2, color: Colors.black54),
                                 borderRadius: const BorderRadius.all(
                                   const Radius.circular(8),
                                 ),
@@ -104,8 +99,9 @@ class _HomeScreenState extends State<HomeScreen>
                                         width: 4,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation(
-                                              const Color(0xFF8D6E63)),
+                                          valueColor:
+                                              AlwaysStoppedAnimation(
+                                                  const Color(0xFF8D6E63)),
                                         ),
                                       ),
                                     )
@@ -128,25 +124,38 @@ class _HomeScreenState extends State<HomeScreen>
                 SliverToBoxAdapter(
                   child: TimeFilter(),
                 ),
-                !providerPost.getLoading || refreshLoading
-                    ? SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index == data.length - 1 &&
-                                posts['next'] != null) {
-                              providerPost.loadMore();
-                              return _reachedEnd();
-                            }
-                            return PostCard(
-                                post: data[index], heroIndex: index.toString());
-                          },
-                          childCount: data.length,
-                        ),
-                      )
-                    : SliverFillRemaining(
-                        child: Loading(),
-                      ),
-              ],
+              ];
+            },
+            body: RefreshIndicator(
+              onRefresh: () async {
+                FocusScope.of(context).unfocus();
+                setState(() {
+                  refreshLoading = true;
+                });
+                await providerPost.fetchPosts();
+                setState(() {
+                  refreshLoading = false;
+                });
+              },
+              child: !providerPost.getLoading || refreshLoading
+                  ? ListView.builder(
+                    padding: EdgeInsets.all(0),
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        if (index == data.length - 1 &&
+                            posts['next'] != null) {
+                          providerPost.loadMore();
+                          return _reachedEnd();
+                        }
+                        return PostCard(
+                          post: data[index],
+                          heroIndex: index.toString(),
+                        );
+                      },
+                    )
+                  : Loading(
+                      backgroundColor: Colors.transparent,
+                    ),
             ),
           ),
         ),

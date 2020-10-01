@@ -7,8 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class UserProvider with ChangeNotifier {
   Map<String, dynamic> _account;
   Map<String, dynamic> get getAccount => _account;
-  Map<String, dynamic> _user;
-  Map<String, dynamic> get getUser => _user;
+  User _user;
+  User get getUser => _user;
   bool loading = false;
   bool authLoading = false;
   final _storage = FlutterSecureStorage();
@@ -41,7 +41,7 @@ class UserProvider with ChangeNotifier {
 
   Future fetchAccout() {
     setLoading(true);
-    print('getting account');
+    print('getting user Account');
     API().getAccount().then((res) {
       if (res.statusCode == 200) {
         setAccount(jsonDecode(res.body)['account']);
@@ -61,7 +61,7 @@ class UserProvider with ChangeNotifier {
     try{  
       dynamic res = await API().getUser(username);
       print(res.body);
-      setUser(jsonDecode(res.body)['user']);
+      setUser(res.body);
       setLoading(false);
       notifyListeners();
       return jsonDecode(res.body);
@@ -76,15 +76,13 @@ class UserProvider with ChangeNotifier {
   Future editProfile(String username, EditProfile data) {
     setLoading(true);
     API().editProfile(username, data).then((res) {
-      print(res.statusCode);
       print(jsonDecode(res.body));
       if (res.statusCode == 200) {
-        // merge new details with present.
-        print('merge coin');
+        Map<String, dynamic> mergeData = _user.toJson()..addAll(data.toJson());
+        User updatedUser = User.fromJson(mergeData);
         // firstname cant be merged with firstName
-        Map<String, dynamic> copyUser = _user..addAll(data.toJson());
-        _user = copyUser;
-        copyUser['firstName'] = data.firstname;
+        updatedUser.firstName = data.firstname;
+        _user = updatedUser;
         setLoading(false);
         notifyListeners();
       }
@@ -117,8 +115,10 @@ class UserProvider with ChangeNotifier {
     _account = value;
   }
 
-  setUser(Map<String, dynamic> value) {
-    _user = value;
+  setUser(value) {
+    Map<String, dynamic> data = jsonDecode(value);
+    Map<String, dynamic> userJson = data['user'];
+    _user = User.fromJson(userJson);
   }
 
   setLoading(value) {

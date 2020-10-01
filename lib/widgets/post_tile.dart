@@ -1,11 +1,11 @@
 import 'package:bazzar/screens/post.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:bazzar/models/post.dart';
 
 class PostTile extends StatelessWidget {
-  final Map post;
+  final Post post;
   const PostTile({Key key, @required this.post}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -16,8 +16,8 @@ class PostTile extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (_) => PostScreen(
-                postId: post['_id'],
-                postImg: post['images'][0].replaceAll('https', 'http'),
+                postId: post.id,
+                postImg: post.images[0].replaceAll('https', 'http'),
               ),
             ),
           );
@@ -34,7 +34,7 @@ class PostTile extends StatelessWidget {
                     child: Container(
                       margin: EdgeInsets.only(right: 10),
                       child: CachedNetworkImage(
-                        imageUrl: post['images'][0].replaceAll('https', 'http'),
+                        imageUrl: post.images[0].replaceAll('https', 'http'),
                         imageBuilder: (context, imageProvider) => Container(
                           height: 100,
                           decoration: BoxDecoration(
@@ -53,7 +53,7 @@ class PostTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          post['title'],
+                          post.title,
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -65,7 +65,7 @@ class PostTile extends StatelessWidget {
                           height: 5,
                         ),
                         Text(
-                          'Comments(${post['comments'].length})',
+                          'Comments(${post.comments.length})',
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
@@ -74,7 +74,7 @@ class PostTile extends StatelessWidget {
                         SizedBox(
                           height: 5,
                         ),
-                        Text(Jiffy(post['createdAt']).format("MMM do yyyy")),
+                        Text(Jiffy(post.createdAt).format("MMM do yyyy")),
                       ],
                     ),
                   )

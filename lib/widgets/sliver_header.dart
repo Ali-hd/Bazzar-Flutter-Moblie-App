@@ -32,26 +32,25 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
     final List<dynamic> imgList = post != null ? post['images'] : [postImg];
 
     void open(BuildContext context, final int index) {
-    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
-      builder: (context) => GalleryPhotoViewWrapper(
-        galleryItems: imgList,
-        backgroundDecoration: const BoxDecoration(
-          color: Colors.black,
+      Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
+        builder: (context) => GalleryPhotoViewWrapper(
+          galleryItems: imgList,
+          backgroundDecoration: const BoxDecoration(
+            color: Colors.black,
+          ),
+          initialIndex: index,
+          scrollDirection: Axis.horizontal,
         ),
-        initialIndex: index,
-        scrollDirection: Axis.horizontal,
-      ),
-    ));
-  }
+      ));
+    }
 
     final List<Widget> imageSliders = imgList
         .map(
           (item) => GalleryCarouselItem(
-            imagePath: item.replaceAll('https', 'http'),
-            onTap: (){
-              open(context, currentIndex);
-            }
-          ),
+              imagePath: item.replaceAll('https', 'http'),
+              onTap: () {
+                open(context, currentIndex);
+              }),
         )
         .toList();
 
@@ -155,6 +154,12 @@ class SliverHeader implements SliverPersistentHeaderDelegate {
             color: Colors.transparent,
             child: InkWell(
               onTap: () async {
+                if (_account == null) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertAuth(),
+                  );
+                }
                 if (_account != null && post != null) {
                   String likeType = await providerPost.handleLike(post['_id']);
                   print('like type = $likeType');

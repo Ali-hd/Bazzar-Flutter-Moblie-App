@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bazzar/Providers/providers.dart';
 import 'package:bazzar/models/post.dart';
-import 'package:bazzar/screens/profile.dart';
 import 'package:bazzar/services/api.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
@@ -301,34 +300,7 @@ class _SellScreenState extends State<SellScreen>
   void showAlertAuth(BuildContext context) {
     showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-              // title: ,
-              content: Text('Please Sign In to use this feature'),
-              actions: [
-                FlatButton(
-                  child: Text('Close'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                FlatButton(
-                  child: Text("Sign In"),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProfileScreen(
-                            username: 'Please login',
-                            profileImg: 'https://i.imgur.com/iV7Sdgm.jpg',
-                            heroIndex: 'user_profile'),
-                      ),
-                    ).then((result) {
-                      Navigator.of(context).pop();
-                    });
-                  },
-                ),
-              ],
-            ));
+        builder: (context) => AlertAuth());
   }
 
   void open(BuildContext context, final int index) {

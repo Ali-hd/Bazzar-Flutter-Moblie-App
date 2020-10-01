@@ -11,3 +11,4 @@ export 'photo_view.dart';
 export 'profile_settings.dart';
 export 'scroll_column.dart';
 export 'auth_btns.dart';
+export 'alert_auth.dart';

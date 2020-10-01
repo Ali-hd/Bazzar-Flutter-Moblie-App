@@ -12,7 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ProfileSettings extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const ProfileSettings({Key key, this.user}) : super(key: key);
   @override
@@ -23,7 +23,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   @override
   void initState() {
     super.initState();
-    profileImg = widget.user['profileImg'];
+    profileImg = widget.user.profileImg;
   }
 
   String profileImg;
@@ -43,7 +43,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         location: values['location'],
         profileImg: profileImg,
       );
-      final res = await providerUser.editProfile(widget.user['username'], data);
+      final res = await providerUser.editProfile(widget.user.username, data);
       print(res);
       if (res != null) {
         _fbKey.currentState.reset();
@@ -89,9 +89,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                 FormBuilder(
                   key: _fbKey,
                   initialValue: {
-                    'firstname': widget.user['firstName'],
-                    'description': widget.user['description'],
-                    'location': widget.user['location']
+                    'firstname': widget.user.firstName,
+                    'description': widget.user.description,
+                    'location': widget.user.location
                   },
                   child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),

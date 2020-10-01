@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:bazzar/screens/post.dart';
 import 'package:jiffy/jiffy.dart';
 import 'widgets.dart';
+import 'package:bazzar/models/post.dart';
 
 class PostCard extends StatelessWidget {
-  final Map post;
+  final Post post;
   final String heroIndex;
   const PostCard({Key key, @required this.post, @required this.heroIndex})
       : super(key: key);
@@ -25,9 +26,9 @@ class PostCard extends StatelessWidget {
                 MaterialPageRoute(
                     builder: (_) => PostScreen(
                         // https from s3 causing issues
-                        postId: post['_id'],
+                        postId: post.id,
                         postImg:
-                            post['images'][0].replaceAll('https', 'http'))));
+                            post.images[0].replaceAll('https', 'http'))));
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -39,7 +40,7 @@ class PostCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: PhotoHero(
-                        photo: post['user']['profileImg']
+                        photo: post.user.profileImg
                             .replaceAll('https', 'http'),
                         width: 30,
                         tag: heroIndex,
@@ -48,8 +49,8 @@ class PostCard extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => ProfileScreen(
-                                  username: post['user']['username'],
-                                  profileImg: post['user']['profileImg'],
+                                  username: post.user.username,
+                                  profileImg: post.user.profileImg,
                                   heroIndex: heroIndex),
                             ),
                           );
@@ -64,15 +65,15 @@ class PostCard extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(post['user']['username']),
-                                Text('${post['views']} views')
+                                Text(post.user.username),
+                                Text('${post.views} views')
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(post['location']),
-                                Text(Jiffy(post['createdAt']).fromNow())
+                                Text(post.location),
+                                Text(Jiffy(post.createdAt).fromNow())
                               ],
                             )
                           ],
@@ -84,10 +85,10 @@ class PostCard extends StatelessWidget {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                  child: Text(post['title']),
+                  child: Text(post.title),
                 ),
                 CachedNetworkImage(
-                  imageUrl: post['images'][0].replaceAll('https', 'http'),
+                  imageUrl: post.images[0].replaceAll('https', 'http'),
                   imageBuilder: (context, imageProvider) => Container(
                     height: 250,
                     decoration: BoxDecoration(

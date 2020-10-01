@@ -40,57 +40,58 @@ class _PostScreenState extends State<PostScreen> {
             .map<Widget>((comment) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    PhotoHero(
-                      photo: comment['user']['profileImg']
-                          .replaceAll('https', 'http'),
-                      width: 30,
-                      tag: comment['createdAt'],
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ProfileScreen(
-                                username: comment['user']['username'],
-                                profileImg: comment['user']['profileImg']
-                                    .replaceAll('https', 'http'),
-                                heroIndex: comment['createdAt']),
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                comment['user']['username'],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PhotoHero(
+                          photo: comment['user']['profileImg']
+                              .replaceAll('https', 'http'),
+                          width: 30,
+                          tag: comment['createdAt'],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProfileScreen(
+                                    username: comment['user']['username'],
+                                    profileImg: comment['user']['profileImg']
+                                        .replaceAll('https', 'http'),
+                                    heroIndex: comment['createdAt']),
                               ),
-                              Text(' • '),
-                              Text(Jiffy(comment['createdAt']).format("MM/d/yyy, hh:mm:ss a")),
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    comment['user']['username'],
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(' • '),
+                                  Text(Jiffy(comment['createdAt'])
+                                      .format("MM/d/yyy, hh:mm:ss a")),
+                                ],
+                              ),
+                              Text(
+                                comment['description'],
+                                style: TextStyle(
+                                  fontFamily: 'OpenSans',
+                                ),
+                              )
                             ],
                           ),
-                          Text(
-                            comment['description'],
-                            style: TextStyle(
-                              fontFamily: 'OpenSans',
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ]),
+                        ),
+                      ]),
                 ))
             .toList()
         : [Text('No Comments')];
@@ -101,7 +102,7 @@ class _PostScreenState extends State<PostScreen> {
       });
     }
 
-    void setIndex(int index){
+    void setIndex(int index) {
       setState(() {
         _current = index;
       });
@@ -134,17 +135,16 @@ class _PostScreenState extends State<PostScreen> {
               child: CustomScrollView(
             slivers: [
               SliverPersistentHeader(
-                pinned: true,
-                delegate: SliverHeader(
-                  providerPost: providerPost,
-                  providerUser: providerUser,
-                  postImg: widget.postImg,
-                  setIndex: setIndex,
-                  currentIndex: _current,
-                  minExtent: 100,
-                  maxExtent: 270,
-                )
-              ),
+                  pinned: true,
+                  delegate: SliverHeader(
+                    providerPost: providerPost,
+                    providerUser: providerUser,
+                    postImg: widget.postImg,
+                    setIndex: setIndex,
+                    currentIndex: _current,
+                    minExtent: 100,
+                    maxExtent: 270,
+                  )),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 10,
@@ -236,7 +236,8 @@ class _PostScreenState extends State<PostScreen> {
                                         SizedBox(
                                           width: 1,
                                         ),
-                                        Text('Submitted: ${Jiffy(post['createdAt']).format("MMM do yyyy")}')
+                                        Text(
+                                            'Submitted: ${Jiffy(post['createdAt']).format("MMM do yyyy")}')
                                       ]),
                                       Row(children: [
                                         Icon(
@@ -346,17 +347,17 @@ class _PostScreenState extends State<PostScreen> {
                                   Padding(
                                     padding: EdgeInsetsDirectional.only(
                                         bottom: 20, top: 10),
-                                    child: 
-                                    _account != null ?
-                                    Row(
+                                    child: Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         CircleAvatar(
                                           radius: 16,
                                           backgroundImage: NetworkImage(
-                                            _account['profileImg']
-                                                .replaceAll('https', 'http'),
+                                            _account != null
+                                                ? _account['profileImg']
+                                                    .replaceAll('https', 'http')
+                                                : 'http://i.imgur.com/iV7Sdgm.jpg',
                                           ),
                                         ),
                                         SizedBox(
@@ -365,8 +366,16 @@ class _PostScreenState extends State<PostScreen> {
                                         Expanded(
                                           child: GestureDetector(
                                             onTap: () {
-                                              _settingModalBottomSheet(
-                                                  context);
+                                              if (_account == null) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      AlertAuth(),
+                                                );
+                                              } else {
+                                                _settingModalBottomSheet(
+                                                    context);
+                                              }
                                             },
                                             child: Container(
                                               height: 35,
@@ -379,14 +388,13 @@ class _PostScreenState extends State<PostScreen> {
                                                 ),
                                               ),
                                               padding: EdgeInsets.symmetric(
-                                                  vertical: 8,
-                                                  horizontal: 10),
+                                                  vertical: 8, horizontal: 10),
                                               child: Text('Post a comment'),
                                             ),
                                           ),
                                         ),
                                       ],
-                                    ) : Container(),
+                                    ),
                                   )
                                 ],
                               ),

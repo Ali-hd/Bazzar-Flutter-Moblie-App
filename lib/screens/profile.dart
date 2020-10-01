@@ -34,8 +34,11 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   void initState() {
     super.initState();
-    final providerUser = Provider.of<UserProvider>(context, listen: false);
-    providerUser.fetchUser(widget.username);
+    print('widget username = ${widget.username}');
+    if (widget.username != 'Please login') {
+      final providerUser = Provider.of<UserProvider>(context, listen: false);
+      providerUser.fetchUser(widget.username);
+    }
     controller = TabController(length: 3, vsync: this);
   }
 
@@ -43,6 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     print('building profile screen');
     final providerUser = Provider.of<UserProvider>(context, listen: false);
+    if(providerUser.getUser != null && providerUser.getUser.username != widget.username ){
+      providerUser.fetchUser(widget.username);
+    }
     return Scaffold(
         appBar: AppBar(
             title: Text(widget.username),
@@ -66,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                         ));
                   } else if (account != null) {
-                    return user != null && user['_id'] == account['_id']
+                    return user != null && user.id == account['_id']
                         ? Container(
                             child: FlatButton.icon(
                                 onPressed: () {
@@ -119,7 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
           child: NestedScrollView(headerSliverBuilder:
               (context, innerBoxIsScrolled) {
-                final account = providerUser.getAccount;
             return [
               SliverOverlapAbsorber(
                 // sliveroverlap and sliver safeArea prevents list item from getting under sliver pinned header
@@ -128,9 +133,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 sliver: SliverSafeArea(
                   top: false,
                   sliver: SliverAppBar(
-                    floating: account != null ? true : false,
-                    pinned: account != null ? true : false,
-                    expandedHeight: account != null ? 450 : 200,
+                    floating: widget.username == 'Please login' ? false : true,
+                    pinned: widget.username == 'Please login' ? false : true,
+                    expandedHeight:
+                        widget.username == 'Please login' ? 200 : 450,
                     backgroundColor: Colors.white,
                     flexibleSpace: FlexibleSpaceBar(
                         collapseMode: CollapseMode.parallax,
@@ -149,12 +155,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       child: PhotoHero(
                                         width: 110,
                                         tag: widget.heroIndex,
-                                        photo: user == null
+                                        photo: widget.username == 'Please login'
                                             ? widget.profileImg
-                                            : widget.profileImg !=
-                                                    user['profileImg']
-                                                ? user['profileImg']
-                                                : widget.profileImg,
+                                            : user == null
+                                                ? widget.profileImg
+                                                : widget.profileImg !=
+                                                        user.profileImg
+                                                    ? user.profileImg
+                                                    : widget.profileImg,
                                       ),
                                     );
                                   },
@@ -192,9 +200,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                                             ),
                                           ),
                                           Divider(),
-                                          Text(user['description'].length < 1
+                                          Text(user.description.length < 1
                                               ? 'No bio provided.'
-                                              : user['description']),
+                                              : user.description),
                                           SizedBox(
                                             height: 5,
                                           ),
@@ -208,9 +216,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                                           SizedBox(
                                             height: 18,
                                             child: Text(
-                                              user['location'].length < 1
+                                              user.location.length < 1
                                                   ? 'No Location provided.'
-                                                  : user['location'],
+                                                  : user.location,
                                               maxLines: 1,
                                             ),
                                           ),
@@ -223,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                 color: Colors.grey[700]),
                                           ),
                                           Divider(),
-                                          Text(Jiffy(user['createdAt'])
+                                          Text(Jiffy(user.createdAt)
                                               .format("MMMM do yyyy")),
                                           SizedBox(
                                             height: 5,
@@ -258,8 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           color: Colors.white,
                           child: Consumer<UserProvider>(
                             builder: (context, providerUser, child) {
-                              final account = providerUser.getAccount;
-                              if (account != null) {
+                              if (widget.username != 'Please login') {
                                 return TabBar(
                                   controller: controller,
                                   labelStyle: TextStyle(
@@ -314,7 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     ),
                                   ],
                                 );
-                              }else{
+                              } else {
                                 return Container();
                               }
                             },
@@ -328,17 +335,17 @@ class _ProfileScreenState extends State<ProfileScreen>
               Consumer<UserProvider>(builder: (context, providerUser, child) {
             final _account = providerUser.getAccount;
             final user = providerUser.getUser;
-            if (user != null) {
+            if (user != null && widget.username != 'Please login') {
               return TabBarView(
                 controller: controller,
                 children: [
                   ListView.builder(
-                    itemCount: user['posts'].length,
+                    itemCount: user.posts.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Column(
                         children: [
                           PostTile(
-                            post: user['posts'][index],
+                            post: user.posts[index],
                           ),
                           Divider(
                             height: 0,
@@ -348,12 +355,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                     },
                   ),
                   ListView.builder(
-                    itemCount: user['ratings'].length,
+                    itemCount: user.ratings.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Column(
                         children: [
                           ReviewTile(
-                            review: user['ratings'][index],
+                            review: user.ratings[index],
                           ),
                           Divider(
                             height: 0,
@@ -362,14 +369,24 @@ class _ProfileScreenState extends State<ProfileScreen>
                       );
                     },
                   ),
-                  // others uses cant see my liked
-                  Icon(Icons.directions_bike),
+                  ListView.builder(
+                    itemCount: user.liked.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          PostTile(
+                            post: user.liked[index],
+                          ),
+                          Divider(
+                            height: 0,
+                          )
+                        ],
+                      );
+                    },
+                  ),
                 ],
               );
-            } else if (_account == null) {
-              // setState(() {
-              //   expandedHeight = 200;
-              // });
+            } else if (_account == null && !providerUser.loading && widget.username == 'Please login') {
               return AuthBtns();
             } else {
               return Loading(
@@ -458,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             ReviewUser(star: rating, description: reviewText);
                         dynamic response = await API().rateUser(
                             Provider.of<UserProvider>(context, listen: false)
-                                .getUser['username'],
+                                .getUser.username,
                             values);
                         print(response.body);
                         Navigator.pop(context);

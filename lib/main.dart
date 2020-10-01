@@ -15,16 +15,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Future<bool> _checktoken() async {
-      final storage = FlutterSecureStorage();
-      String token = await storage.read(key: 'token');
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      final bool isExpired = JwtDecoder.isExpired(token);
-      print('token= $token');
-      print('token is expired $isExpired');
-      return isExpired;
-    }
-
+    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -40,23 +31,6 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: BottomNavigationBarController(),
       ),
-      // child: MaterialApp(
-      //   home: FutureBuilder(
-      //     future: _checktoken(),
-      //     builder: (context, snapshot) {
-      //       if (snapshot.hasData) {
-      //         //is expired = true
-      //         if (snapshot.data) {
-      //           return Authenticate();
-      //         } else {
-      //           return BottomNavigationBarController();
-      //         }
-      //       } else {
-      //         return Loading();
-      //       }
-      //     },
-      //   ),
-      // ),
     );
   }
 }
